@@ -24,7 +24,7 @@ export default async function ContactsPage() {
         </div>
         <BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>
       </div>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {contacts.map((contact) => (
           <article key={contact.id} className={`p-4 ${cardClass}`}>
             <p className="font-medium">{contact.name}</p>

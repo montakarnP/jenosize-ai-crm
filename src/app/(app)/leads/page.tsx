@@ -35,7 +35,7 @@ export default async function LeadsPage({
         {leads.map((lead) => (
           <Link key={lead.id} href={`/leads/${lead.id}`} className={`block p-4 ${cardClass}`}>
             <div className="flex items-start justify-between gap-3">
-              <p className="font-medium">{lead.title}</p>
+              <p className="min-w-0 font-medium break-words">{lead.title}</p>
               <span className="flex flex-wrap items-center justify-end gap-2">
                 <UnreadBadge count={lead._count.messages} label={t(locale, "common.new")} />
                 <StageBadge stage={lead.stage} label={stageText(locale, lead.stage)} />

@@ -31,7 +31,7 @@ export default async function CompaniesPage() {
         {grouped.map((group) => (
           <section key={group.industry}>
             <h2 className="text-lg font-medium text-brand">{group.industry}</h2>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {group.companies.map((company) => (
                 <Link key={company.id} href={`/companies/${company.id}`} className={`block p-4 ${cardClass}`}>
                   <p className="font-medium">{company.name}</p>

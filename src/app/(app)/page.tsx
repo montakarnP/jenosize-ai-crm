@@ -31,11 +31,11 @@ export default async function PipelinePage({
       <div className="mt-5">
         <Filters action="/" q={params.q ?? ""} stage={params.stage ?? ""} source={params.source ?? ""} />
       </div>
-      <div className="mt-6 flex gap-3 overflow-x-auto pb-4">
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
         {STAGES.map((stage) => {
           const column = leads.filter((lead) => lead.stage === stage);
           return (
-            <section key={stage} className="w-72 shrink-0 rounded-2xl border border-line bg-white/75 p-3">
+            <section key={stage} className="min-w-0 rounded-2xl border border-line bg-white/75 p-3">
               <header className="mb-3 flex items-center justify-between">
                 <h2 className="text-sm font-medium">{stageText(locale, stage)}</h2>
                 <span className="text-xs text-muted">{column.length}</span>
@@ -52,8 +52,8 @@ export default async function PipelinePage({
                       <StageBadge stage={lead.stage} label={stageText(locale, lead.stage)} />
                       <UnreadBadge count={lead._count.messages} label={t(locale, "common.new")} />
                     </span>
-                    <p className="mt-2 text-sm font-medium">{lead.title}</p>
-                    <p className="mt-1 text-sm text-muted">{lead.company?.name ?? t(locale, "common.noCompany")}</p>
+                    <p className="mt-2 text-sm font-medium break-words">{lead.title}</p>
+                    <p className="mt-1 text-sm break-words text-muted">{lead.company?.name ?? t(locale, "common.noCompany")}</p>
                     <p className="mt-2 text-xs text-muted">
                       {formatThb(lead.valueThb)} · {sourceText(locale, lead.source)}
                     </p>

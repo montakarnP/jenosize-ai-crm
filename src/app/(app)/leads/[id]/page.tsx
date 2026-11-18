@@ -99,7 +99,7 @@ export default async function LeadDetailPage({
             <h1 className="text-2xl font-semibold tracking-tight">{lead.title}</h1>
             <StageBadge stage={lead.stage} label={stageText(locale, lead.stage)} />
           </div>
-          <p className="mt-2 text-sm text-muted">
+          <p className="mt-2 text-sm break-words text-muted">
             {lead.company?.name ?? t(locale, "common.noCompany")} · {sourceLabel(lead.source)} · {formatThb(lead.valueThb)}
           </p>
         </div>
@@ -226,12 +226,12 @@ export default async function LeadDetailPage({
           <ol className="mt-4 space-y-4">
             {timeline.length === 0 ? <li className="text-sm text-muted">{t(locale, "lead.noActivity")}</li> : null}
             {timeline.map((item) => (
-              <li key={item.id} className="border-l-2 border-line pl-4">
-                <p className="text-xs text-muted">
+              <li key={item.id} className="min-w-0 border-l-2 border-line pl-4">
+                <p className="text-xs break-words text-muted">
                   {timelineLabel(locale, item)} · {item.actor === "System" ? t(locale, "timeline.system") : item.actor === "Contact" ? t(locale, "timeline.contact") : item.actor} · {formatWhen(item.at, locale)}
                   {item.messageId ? <NewFlag messageId={item.messageId} unseen={item.fresh} label={t(locale, "common.new")} /> : null}
                 </p>
-                <p className="mt-1 text-sm leading-6">{item.body}</p>
+                <p className="mt-1 text-sm leading-6 break-words">{item.body}</p>
               </li>
             ))}
           </ol>

@@ -27,8 +27,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen">
       <LiveRefresh />
       <header className="border-b border-line bg-white/85 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 sm:px-6">
-          <div className="flex items-center justify-between gap-4">
+        <div className="mx-auto flex w-full max-w-[85vw] flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <BrandMark />
             <div className="flex items-center gap-3 text-sm">
               <span className="hidden text-right sm:block">
@@ -55,8 +55,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           />
         </div>
       </header>
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</div>
-      <footer className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+      <div className="mx-auto w-full max-w-[85vw] px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+      <footer className="mx-auto w-full max-w-[85vw] px-4 pb-8 sm:px-6 lg:px-8">
         <DeveloperCredit />
       </footer>
     </div>
