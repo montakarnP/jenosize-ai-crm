@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { login } from "@/app/actions";
 import { BlobButton } from "@/components/blob-button";
 import { BrandMark } from "@/components/brand-mark";
+import { DeveloperCredit } from "@/components/developer-credit";
 import { FormPending } from "@/components/form-pending";
 import { LanguageSwitch } from "@/components/language-switch";
 import { getLocale, t } from "@/lib/i18n";
@@ -50,6 +51,9 @@ export default async function LoginPage({
           </BlobButton>
         </form>
         <p className="mt-6 text-sm leading-6 text-muted">{t(locale, "auth.demo")}</p>
+        <div className="mt-4">
+          <DeveloperCredit />
+        </div>
       </section>
     </main>
   );

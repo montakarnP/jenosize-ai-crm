@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { logout } from "@/app/actions";
 import { BlobButton } from "@/components/blob-button";
 import { BrandMark } from "@/components/brand-mark";
+import { DeveloperCredit } from "@/components/developer-credit";
 import { FormPending } from "@/components/form-pending";
 import { LanguageSwitch } from "@/components/language-switch";
 import { LiveRefresh } from "@/components/live-refresh";
@@ -55,6 +56,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">{children}</div>
+      <footer className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
+        <DeveloperCredit />
+      </footer>
     </div>
   );
 }

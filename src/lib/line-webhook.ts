@@ -9,8 +9,31 @@ export type LineTextEvent = {
   timestamp: number;
 };
 
+export type LineFollowEvent = {
+  webhookEventId: string;
+  userId: string;
+  replyToken: string | null;
+  timestamp: number;
+};
+
+export function lineGreetingText(): string {
+  return [
+    "Welcome to Jenosize.",
+    "Send I am and your LINE id to connect this account to a contact.",
+    "Example: I am LK-OISHI",
+    "",
+    "ยินดีต้อนรับสู่ Jenosize",
+    "ส่ง I am ตามด้วย LINE id เพื่อเชื่อมบัญชีนี้กับผู้ติดต่อ",
+    "ตัวอย่าง: I am LK-OISHI",
+  ].join("\n");
+}
+
 export function lineEventIdempotencyKey(webhookEventId: string): string {
   return `line-event:${webhookEventId}`;
+}
+
+export function lineFollowIdempotencyKey(webhookEventId: string): string {
+  return `line-follow:${webhookEventId}`;
 }
 
 export function readLineLinkClaim(text: string): string | null {
@@ -39,15 +62,37 @@ export function lineLinkReply(decision: "missing" | "already_self" | "taken" | "
   return `Connected to ${contactName}. Messages for this contact will come to this LINE account.`;
 }
 
-export function readLineWebhook(payload: unknown): { ok: true; events: LineTextEvent[] } | { ok: false } {
+function readLineUser(record: Record<string, unknown>): LineFollowEvent | null {
+  const source = record.source;
+  if (typeof source !== "object" || source === null) return null;
+  const sourceRecord = source as Record<string, unknown>;
+  if (sourceRecord.type !== "user" || typeof sourceRecord.userId !== "string") return null;
+  if (typeof record.webhookEventId !== "string" || record.webhookEventId.length < 8) return null;
+  return {
+    webhookEventId: record.webhookEventId,
+    userId: sourceRecord.userId,
+    replyToken: typeof record.replyToken === "string" ? record.replyToken : null,
+    timestamp: typeof record.timestamp === "number" ? record.timestamp : Date.now(),
+  };
+}
+
+export function readLineWebhook(
+  payload: unknown,
+): { ok: true; events: LineTextEvent[]; follows: LineFollowEvent[] } | { ok: false } {
   if (typeof payload !== "object" || payload === null || !("events" in payload)) return { ok: false };
   const eventsField = payload.events;
   if (!Array.isArray(eventsField)) return { ok: false };
 
   const events: LineTextEvent[] = [];
+  const follows: LineFollowEvent[] = [];
   for (const event of eventsField) {
     if (typeof event !== "object" || event === null) return { ok: false };
     const record = event as Record<string, unknown>;
+    if (record.type === "follow") {
+      const follow = readLineUser(record);
+      if (follow) follows.push(follow);
+      continue;
+    }
     if (record.type !== "message") continue;
     const message = record.message;
     const source = record.source;
@@ -67,7 +112,7 @@ export function readLineWebhook(payload: unknown): { ok: true; events: LineTextE
       timestamp: typeof record.timestamp === "number" ? record.timestamp : Date.now(),
     });
   }
-  return { ok: true, events };
+  return { ok: true, events, follows };
 }
 
 async function openLeadId(contactId: string): Promise<string | null> {
@@ -189,6 +234,81 @@ async function ingestLineClaim(
     activityBody: leadId ? `Received a LINE message from ${contactName}.` : null,
   });
   await sendLineNotice(event, contactId, leadId, reply);
+  return { result: "accepted", leadId };
+}
+
+export async function ingestLineFollow(
+  event: LineFollowEvent,
+): Promise<{ result: "accepted" | "duplicate"; leadId: string | null }> {
+  const contact = await prisma.contact.findUnique({
+    where: { lineUserId: event.userId },
+    select: { id: true, name: true },
+  });
+  const leadId = contact ? await openLeadId(contact.id) : null;
+  const body = lineGreetingText();
+  const externalId = `follow-greeting:${event.webhookEventId}`;
+
+  let messageId: string;
+  try {
+    const message = await prisma.message.create({
+      data: {
+        leadId,
+        contactId: contact?.id ?? null,
+        channel: "LINE",
+        direction: "OUTBOUND",
+        status: "APPROVED",
+        body,
+        externalId,
+        lineUserId: event.userId,
+        idempotencyKey: lineFollowIdempotencyKey(event.webhookEventId),
+        replyToken: event.replyToken,
+        createdAt: new Date(event.timestamp),
+      },
+      select: { id: true },
+    });
+    messageId = message.id;
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const existing = await prisma.message.findUnique({
+        where: { idempotencyKey: lineFollowIdempotencyKey(event.webhookEventId) },
+        select: { leadId: true },
+      });
+      return { result: "duplicate", leadId: existing?.leadId ?? leadId };
+    }
+    throw error;
+  }
+
+  const { deliverLineText } = await import("@/lib/line-send");
+  const result = await deliverLineText({
+    to: event.userId,
+    text: body,
+    replyToken: event.replyToken,
+    externalId,
+  });
+  await prisma.message.update({
+    where: { id: messageId },
+    data: { status: result.ok ? "SENT" : "FAILED", error: result.ok ? null : result.error },
+  });
+  if (leadId) {
+    await prisma.activity.create({
+      data: {
+        leadId,
+        type: "LINE_MESSAGE",
+        body: `Sent a LINE greeting to ${contact?.name ?? "the contact"}.`,
+        createdAt: new Date(event.timestamp),
+        metadata: { status: result.ok ? "SENT" : "FAILED", outbound: true, webhookEventId: event.webhookEventId },
+      },
+    });
+  }
+  console.info(
+    JSON.stringify({
+      event: "line.send",
+      messageId,
+      mode: process.env.LINE_MODE === "live" ? "live" : "mock",
+      status: result.ok ? "SENT" : "FAILED",
+      kind: "greeting",
+    }),
+  );
   return { result: "accepted", leadId };
 }
 

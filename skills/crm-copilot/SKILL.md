@@ -70,7 +70,8 @@ LINE is a separate path from the suggestion. The copilot never calls it.
 
 - `POST /api/line/webhook` checks `X-Line-Signature` with HMAC-SHA256 over the raw body. A missing secret returns 503. A bad signature returns 401.
 - A phone connects by sending `I am` plus the contact's mock LINE id. If that phone or that id is already connected, the reply is `It's cannot connect because it's connected with other account.` A connected phone's later messages are stored on that contact's open lead.
+- A follow event, sent when someone adds the Official Account, gets one greeting. The idempotency key is `line-follow:{webhookEventId}`. The greeting tells the person to send `I am` plus a mock LINE id. It does not create a contact.
 - The idempotency key is `line-event:{webhookEventId}`. A repeat of the same event returns duplicate and does not insert a second message.
 - A salesperson may save the draft as `DRAFT`. Approve and send is the only path that can mark it `SENT`.
-- `LINE_MODE=mock` records the send locally and does not call `api.line.me`. `LINE_MODE=live` pushes an approved draft to the connected user. The immediate reply to `I am …` tries the reply token once, then pushes if LINE rejects that token. A 429, 5xx, or network failure is retried once. A send with no connected user is refused and does not call LINE.
+- `LINE_MODE=mock` records the send locally and does not call `api.line.me`. `LINE_MODE=live` replies with the latest reply token, or pushes to the LINE user, and retries once on HTTP 429, 5xx, or a network failure.
 - Channel secret and access token stay in the environment. They are not written to the skill, the seed, or git.
