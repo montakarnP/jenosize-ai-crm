@@ -33,10 +33,363 @@ body::before {
 
 h1,
 h2,
-.font-display {
+.font-display,
+button,
+.blob-btn,
+.tone-blob,
+.loading-panel__title {
   font-family: var(--font-prompt), "Prompt", sans-serif;
+}
+
+.loading-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.loading-panel__card {
+  display: flex;
+  width: min(100%, 280px);
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 24px;
+  background: #ffffff;
+  padding: 28px 24px;
+  box-shadow: 0 24px 70px rgba(32, 76, 213, 0.12);
+  text-align: center;
+}
+
+.loading-panel__spinner {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 3px solid #d9e6f5;
+  border-top-color: #00d2ff;
+  animation: loading-spin 0.7s linear infinite;
+}
+
+.loading-panel__title {
+  margin: 4px 0 0;
+  color: #204cd5;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.loading-panel__hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 a {
   color: inherit;
+}
+
+.tone-blob {
+  --blob: #145a8f;
+  z-index: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--blob);
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  transition: color 0.5s;
+  cursor: pointer;
+  border-radius: 30px;
+  white-space: nowrap;
+}
+
+.tone-blob--auth {
+  --blob: #0505a9;
+}
+
+.tone-blob--header {
+  --blob: #3244a8;
+}
+
+.tone-blob--action {
+  --blob: #145a8f;
+}
+
+.tone-blob--circle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 999px;
+  letter-spacing: 0;
+}
+
+.tone-blob--circle:before,
+.tone-blob--circle:after,
+.tone-blob--circle .blob-btn__inner {
+  border-radius: 999px;
+}
+
+.tone-blob:before {
+  content: "";
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid var(--blob);
+  border-radius: 30px;
+}
+
+.tone-blob:after {
+  content: "";
+  z-index: -2;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s 0.2s;
+  border-radius: 30px;
+}
+
+.tone-blob:hover {
+  color: #ffffff;
+}
+
+.tone-blob:hover:after {
+  transition: all 0.3s;
+  left: 0;
+  top: 0;
+}
+
+.tone-blob .blob-btn__inner {
+  z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  background: #ffffff;
+}
+
+.tone-blob .blob-btn__blobs {
+  position: relative;
+  display: block;
+  height: 100%;
+  filter: url("#goo-tone");
+}
+
+.tone-blob .blob-btn__blob {
+  position: absolute;
+  top: 2px;
+  width: 25%;
+  height: 100%;
+  background: var(--blob);
+  border-radius: 100%;
+  transform: translate3d(0, 150%, 0) scale(1.7);
+  transition: transform 0.45s;
+}
+
+@supports (filter: url("#goo-tone")) {
+  .tone-blob .blob-btn__blob {
+    transform: translate3d(0, 150%, 0) scale(1.4);
+  }
+}
+
+.tone-blob .blob-btn__blob:nth-child(1) {
+  left: 0%;
+  transition-delay: 0s;
+}
+
+.tone-blob .blob-btn__blob:nth-child(2) {
+  left: 30%;
+  transition-delay: 0.08s;
+}
+
+.tone-blob .blob-btn__blob:nth-child(3) {
+  left: 60%;
+  transition-delay: 0.16s;
+}
+
+.tone-blob .blob-btn__blob:nth-child(4) {
+  left: 90%;
+  transition-delay: 0.24s;
+}
+
+.tone-blob:hover .blob-btn__blob {
+  transform: translateZ(0) scale(1.7);
+}
+
+@supports (filter: url("#goo-tone")) {
+  .tone-blob:hover .blob-btn__blob {
+    transform: translateZ(0) scale(1.4);
+  }
+}
+
+.tone-blob:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-goo {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.nav-links .blob-btn {
+  z-index: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  text-align: center;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #0505a9;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  background-color: transparent;
+  outline: none;
+  border: none;
+  transition: color 0.5s;
+  cursor: pointer;
+  border-radius: 30px;
+  white-space: nowrap;
+}
+
+.nav-links .blob-btn:before {
+  content: "";
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #0505a9;
+  border-radius: 30px;
+}
+
+.nav-links .blob-btn:after {
+  content: "";
+  z-index: -2;
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s 0.2s;
+  border-radius: 30px;
+}
+
+.nav-links .blob-btn:hover,
+.nav-links .blob-btn.is-active {
+  color: #ffffff;
+}
+
+.nav-links .blob-btn:hover:after,
+.nav-links .blob-btn.is-active:after {
+  transition: all 0.3s;
+  left: 0;
+  top: 0;
+}
+
+.nav-links .blob-btn__inner {
+  z-index: -1;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  background: #ffffff;
+}
+
+.nav-links .blob-btn__blobs {
+  position: relative;
+  display: block;
+  height: 100%;
+  filter: url("#goo");
+}
+
+.nav-links .blob-btn__blob {
+  position: absolute;
+  top: 2px;
+  width: 25%;
+  height: 100%;
+  background: #0505a9;
+  border-radius: 100%;
+  transform: translate3d(0, 150%, 0) scale(1.7);
+  transition: transform 0.45s;
+}
+
+@supports (filter: url("#goo")) {
+  .nav-links .blob-btn__blob {
+    transform: translate3d(0, 150%, 0) scale(1.4);
+  }
+}
+
+.nav-links .blob-btn__blob:nth-child(1) {
+  left: 0%;
+  transition-delay: 0s;
+}
+
+.nav-links .blob-btn__blob:nth-child(2) {
+  left: 30%;
+  transition-delay: 0.08s;
+}
+
+.nav-links .blob-btn__blob:nth-child(3) {
+  left: 60%;
+  transition-delay: 0.16s;
+}
+
+.nav-links .blob-btn__blob:nth-child(4) {
+  left: 90%;
+  transition-delay: 0.24s;
+}
+
+.nav-links .blob-btn:hover .blob-btn__blob,
+.nav-links .blob-btn.is-active .blob-btn__blob {
+  transform: translateZ(0) scale(1.7);
+}
+
+@supports (filter: url("#goo")) {
+  .nav-links .blob-btn:hover .blob-btn__blob,
+  .nav-links .blob-btn.is-active .blob-btn__blob {
+    transform: translateZ(0) scale(1.4);
+  }
 }

@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getLead } from "@/lib/crm";
-import { suggestForLead, type CopilotSuggestion, type LeadContext } from "@/lib/copilot";
+import { suggestForLead, type ChatLanguage, type CopilotSuggestion, type LeadContext } from "@/lib/copilot";
 
 function leadContext(lead: NonNullable<Awaited<ReturnType<typeof getLead>>>): LeadContext {
   const inbound = lead.messages.filter((message) => message.direction === "INBOUND");
@@ -21,14 +21,25 @@ function leadContext(lead: NonNullable<Awaited<ReturnType<typeof getLead>>>): Le
   };
 }
 
+export function parseChatLanguage(value: unknown): ChatLanguage {
+  return value === "th" ? "th" : "en";
+}
+
 export async function recordCopilotSuggestion(input: {
   leadId: string;
   actorId: string;
+  chatLanguage: ChatLanguage;
 }): Promise<{ ok: true; suggestion: CopilotSuggestion } | { ok: false; code: "not_found" }> {
   const lead = await getLead(input.leadId);
   if (!lead) return { ok: false, code: "not_found" };
+  if (lead.contactId) {
+    await prisma.contact.update({
+      where: { id: lead.contactId },
+      data: { chatLanguage: input.chatLanguage },
+    });
+  }
 
-  const suggestion = await suggestForLead(leadContext(lead));
+  const suggestion = await suggestForLead(leadContext(lead), input.chatLanguage);
   const metadata: Prisma.InputJsonObject = {
     summary: suggestion.summary,
     score: suggestion.score,
@@ -68,6 +79,7 @@ export async function saveLineDraft(input: {
   leadId: string;
   actorId: string;
   body: string;
+  chatLanguage: ChatLanguage;
 }): Promise<{ ok: true; messageId: string } | { ok: false; code: "invalid" | "not_found" }> {
   const body = input.body.trim();
   if (body.length < 1 || body.length > 1000) return { ok: false, code: "invalid" };
@@ -77,6 +89,12 @@ export async function saveLineDraft(input: {
     select: { id: true, contactId: true },
   });
   if (!lead) return { ok: false, code: "not_found" };
+  if (lead.contactId) {
+    await prisma.contact.update({
+      where: { id: lead.contactId },
+      data: { chatLanguage: input.chatLanguage },
+    });
+  }
 
   const [message] = await prisma.$transaction([
     prisma.message.create({

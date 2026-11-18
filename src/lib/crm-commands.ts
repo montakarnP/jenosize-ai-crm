@@ -1,3 +1,4 @@
+import { randomBytes } from "crypto";
 import { Prisma, type LeadSource, type LeadStage } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { industries } from "@/lib/industries";
@@ -46,6 +47,15 @@ export async function changeLeadStage(input: {
     }),
   ]);
 
+  console.info(
+    JSON.stringify({
+      event: "crm.stage",
+      leadId: input.leadId,
+      from,
+      to: input.stage,
+      lostReason: input.stage === "LOST",
+    }),
+  );
   return { ok: true, changed: true };
 }
 
@@ -112,6 +122,13 @@ export async function createLeadRecord(input: {
   return { ok: true, leadId: lead.id };
 }
 
+export async function disconnectContactLine(contactId: string): Promise<{ ok: true } | Failure> {
+  const contact = await prisma.contact.findUnique({ where: { id: contactId }, select: { id: true } });
+  if (!contact) return { ok: false, code: "not_found" };
+  await prisma.contact.update({ where: { id: contactId }, data: { lineUserId: null } });
+  return { ok: true };
+}
+
 export async function createCompanyRecord(input: {
   name: string;
   industry: string;
@@ -161,6 +178,7 @@ export async function createContactRecord(input: {
         title: title || null,
         email: email || null,
         phone: phone || null,
+        lineCode: `LK-${randomBytes(3).toString("hex").toUpperCase()}`,
       },
       select: { id: true },
     });

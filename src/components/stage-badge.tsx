@@ -9,10 +9,10 @@ const tones: Record<LeadStage, string> = {
   LOST: "bg-slate-100 text-slate-500",
 };
 
-export function StageBadge({ stage }: { stage: LeadStage }) {
+export function StageBadge({ stage, label }: { stage: LeadStage; label?: string }) {
   return (
     <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${tones[stage]}`}>
-      {stageLabel(stage)}
+      {label ?? stageLabel(stage)}
     </span>
   );
 }

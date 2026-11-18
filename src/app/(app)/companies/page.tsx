@@ -1,11 +1,13 @@
-import Link from "next/link";
+import { AppLink as Link } from "@/components/app-link";
+import { BlobLink } from "@/components/blob-button";
 import { listCompanies } from "@/lib/crm";
-import { countLabel } from "@/lib/format";
+import { countText, getLocale, t } from "@/lib/i18n";
 import { companiesByIndustry, industries } from "@/lib/industries";
-import { cardClass, primaryButtonClass } from "@/lib/ui";
+import { cardClass } from "@/lib/ui";
 
 export default async function CompaniesPage() {
   const companies = await listCompanies();
+  const locale = await getLocale();
   const grouped = industries.map((industry) => {
     const names = companiesByIndustry[industry];
     return {
@@ -18,14 +20,12 @@ export default async function CompaniesPage() {
     <main>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Companies</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{t(locale, "companies.title")}</h1>
           <p className="mt-1 text-sm text-muted">
-            {companies.length} companies across {industries.length} industries
+            {t(locale, "companies.summary", { count: companies.length, industries: industries.length })}
           </p>
         </div>
-        <Link href="/companies/new" className={primaryButtonClass}>
-          Add company
-        </Link>
+        <BlobLink href="/companies/new">{t(locale, "companies.add")}</BlobLink>
       </div>
       <div className="mt-8 space-y-8">
         {grouped.map((group) => (
@@ -36,7 +36,7 @@ export default async function CompaniesPage() {
                 <Link key={company.id} href={`/companies/${company.id}`} className={`block p-4 ${cardClass}`}>
                   <p className="font-medium">{company.name}</p>
                   <p className="mt-3 text-sm text-muted">
-                    {countLabel(company._count.contacts, "contact")} · {countLabel(company._count.leads, "lead")}
+                    {countText(locale, "contact", company._count.contacts)} · {countText(locale, "lead", company._count.leads)}
                   </p>
                 </Link>
               ))}

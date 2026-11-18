@@ -89,8 +89,10 @@ model Contact {
   email      String?   @unique
   phone      String?
   title      String?
-  lineUserId String?   @unique
-  createdAt  DateTime  @default(now())
+  lineCode     String    @unique
+  lineUserId   String?   @unique
+  chatLanguage String    @default("en")
+  createdAt    DateTime  @default(now())
   leads      Lead[]
   messages   Message[]
 
@@ -148,9 +150,11 @@ model Message {
   status         MessageStatus
   body           String
   externalId     String?
+  lineUserId     String?
   idempotencyKey String?          @unique
   replyToken     String?
   error          String?
+  seenAt         DateTime?
   createdAt      DateTime         @default(now())
 
   @@unique([channel, externalId])

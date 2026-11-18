@@ -30,14 +30,22 @@ const leadCard = {
   company: true,
   contact: true,
   owner: publicOwner,
+  _count: {
+    select: {
+      messages: { where: { channel: "LINE", direction: "INBOUND", seenAt: null } },
+    },
+  },
 } satisfies Prisma.LeadInclude;
 
 export type TimelineItem = {
   id: string;
   at: Date;
-  label: string;
+  kind: "stage" | "note" | "ai" | "line" | "system" | "inbound" | "outbound";
+  status: string | null;
   actor: string;
   body: string;
+  fresh: boolean;
+  messageId: string | null;
 };
 
 export function buildTimeline(lead: {
@@ -55,31 +63,37 @@ export function buildTimeline(lead: {
     direction: string;
     status: string;
     body: string;
+    seenAt: Date | null;
   }>;
 }): TimelineItem[] {
   return [
     ...lead.activities.map((activity) => ({
       id: `activity-${activity.id}`,
       at: activity.createdAt,
-      label:
-        activity.type === "STAGE_CHANGE"
-          ? "Stage"
-          : activity.type === "NOTE"
-            ? "Note"
-            : activity.type === "AI_SUGGESTION"
-              ? "AI suggestion"
-              : activity.type === "LINE_MESSAGE"
-                ? "LINE"
-                : "System",
+      kind: (activity.type === "STAGE_CHANGE"
+        ? "stage"
+        : activity.type === "NOTE"
+          ? "note"
+          : activity.type === "AI_SUGGESTION"
+            ? "ai"
+            : activity.type === "LINE_MESSAGE"
+              ? "line"
+              : "system") as TimelineItem["kind"],
+      status: null,
       actor: activity.actor?.name ?? "System",
       body: activity.body,
+      fresh: false,
+      messageId: null,
     })),
     ...lead.messages.map((message) => ({
       id: `message-${message.id}`,
       at: message.createdAt,
-      label: message.direction === "INBOUND" ? "LINE inbound" : `LINE ${message.status.toLowerCase()}`,
+      kind: (message.direction === "INBOUND" ? "inbound" : "outbound") as TimelineItem["kind"],
+      status: message.status,
       actor: message.direction === "INBOUND" ? (lead.contact?.name ?? "Contact") : "CRM",
       body: message.body,
+      fresh: message.direction === "INBOUND" && message.seenAt == null,
+      messageId: message.id,
     })),
   ].sort((left, right) => left.at.getTime() - right.at.getTime());
 }

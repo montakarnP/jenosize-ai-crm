@@ -18,6 +18,19 @@ async function postLine(path: "reply" | "push", body: unknown, token: string): P
   });
 }
 
+async function lineError(response: Response): Promise<string> {
+  const fallback = `LINE returned ${response.status}.`;
+  try {
+    const body = (await response.json()) as { message?: unknown };
+    if (typeof body.message === "string" && body.message.length > 0 && body.message.length < 160) {
+      return `LINE returned ${response.status}: ${body.message}`;
+    }
+  } catch {
+    return fallback;
+  }
+  return fallback;
+}
+
 async function deliverOnce(input: {
   to: string;
   text: string;
@@ -28,20 +41,28 @@ async function deliverOnce(input: {
 
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN?.trim();
   if (!token) return { ok: false, error: "LINE access token is not configured.", retryable: false };
+  const message = { type: "text", text: input.text };
 
   try {
     const response = input.replyToken
-      ? await postLine("reply", { replyToken: input.replyToken, messages: [{ type: "text", text: input.text }] }, token)
-      : await postLine("push", { to: input.to, messages: [{ type: "text", text: input.text }] }, token);
+      ? await postLine("reply", { replyToken: input.replyToken, messages: [message] }, token)
+      : await postLine("push", { to: input.to, messages: [message] }, token);
     if (response.ok) return { ok: true, externalId: input.externalId };
+    // A reply token works once, for a few seconds. LINE answers 400 after that, so send by push.
+    if (input.replyToken && response.status === 400) {
+      const pushed = await postLine("push", { to: input.to, messages: [message] }, token);
+      if (pushed.ok) return { ok: true, externalId: input.externalId };
+      const retryable = pushed.status === 429 || pushed.status >= 500;
+      return { ok: false, error: await lineError(pushed), retryable };
+    }
     const retryable = response.status === 429 || response.status >= 500;
-    return { ok: false, error: `LINE returned ${response.status}.`, retryable };
+    return { ok: false, error: await lineError(response), retryable };
   } catch {
     return { ok: false, error: "LINE did not respond.", retryable: true };
   }
 }
 
-async function deliverLineText(input: {
+export async function deliverLineText(input: {
   to: string;
   text: string;
   replyToken: string | null;
@@ -79,16 +100,11 @@ export async function sendApprovedDraft(input: {
     return { ok: false, code: "not_draft" };
   }
 
-  const inbound = await prisma.message.findFirst({
-    where: { leadId: input.leadId, direction: "INBOUND", replyToken: { not: null } },
-    orderBy: { createdAt: "desc" },
-    select: { replyToken: true },
-  });
   const externalId = `send:${message.id}`;
   const result = await deliverLineText({
     to: lineUserId,
     text: message.body,
-    replyToken: lineMode() === "live" ? (inbound?.replyToken ?? null) : null,
+    replyToken: null,
     externalId,
   });
 

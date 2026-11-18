@@ -1,10 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { AppLink as Link } from "@/components/app-link";
 import { useMemo, useState } from "react";
 import { createLead } from "@/app/actions";
-import { SOURCES, sourceLabel } from "@/lib/format";
-import { fieldClass, primaryButtonClass } from "@/lib/ui";
+import { BlobButton } from "@/components/blob-button";
+import { FormPending } from "@/components/form-pending";
+import { SOURCES } from "@/lib/format";
+import { fieldClass } from "@/lib/ui";
 
 type CompanyOption = { id: string; name: string };
 type ContactOption = { id: string; name: string; title: string | null; companyId: string | null };
@@ -12,9 +14,23 @@ type ContactOption = { id: string; name: string; title: string | null; companyId
 export function NewLeadForm({
   companies,
   contacts,
+  labels,
+  sourceLabels,
 }: {
   companies: CompanyOption[];
   contacts: ContactOption[];
+  labels: {
+    title: string;
+    company: string;
+    contact: string;
+    value: string;
+    source: string;
+    create: string;
+    noContact: string;
+    addContact: string;
+    beforeLead: string;
+  };
+  sourceLabels: Record<(typeof SOURCES)[number], string>;
 }) {
   const [companyId, setCompanyId] = useState(companies[0]?.id ?? "");
   const visibleContacts = useMemo(
@@ -24,12 +40,13 @@ export function NewLeadForm({
 
   return (
     <form action={createLead} className="space-y-4">
+      <FormPending />
       <label className="block text-sm">
-        <span className="mb-1 block text-muted">Title</span>
+        <span className="mb-1 block text-muted">{labels.title}</span>
         <input name="title" required minLength={2} maxLength={160} className={fieldClass} />
       </label>
       <label className="block text-sm">
-        <span className="mb-1 block text-muted">Company</span>
+        <span className="mb-1 block text-muted">{labels.company}</span>
         <select
           name="companyId"
           value={companyId}
@@ -44,14 +61,14 @@ export function NewLeadForm({
         </select>
       </label>
       <label className="block text-sm">
-        <span className="mb-1 block text-muted">Contact</span>
+        <span className="mb-1 block text-muted">{labels.contact}</span>
         {visibleContacts.length === 0 ? (
           <p className="rounded-xl border border-line bg-mist px-3 py-2 text-sm text-muted">
-            This company has no contact yet.{" "}
+            {labels.noContact}{" "}
             <Link href="/contacts/new" className="text-brand">
-              Add a contact
+              {labels.addContact}
             </Link>{" "}
-            before creating the lead.
+            {labels.beforeLead}
           </p>
         ) : (
           <select name="contactId" className={fieldClass} required>
@@ -66,23 +83,23 @@ export function NewLeadForm({
       </label>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block text-sm">
-          <span className="mb-1 block text-muted">Value (THB)</span>
+          <span className="mb-1 block text-muted">{labels.value}</span>
           <input name="valueThb" type="number" min={0} step={1} defaultValue={0} required className={fieldClass} />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block text-muted">Source</span>
+          <span className="mb-1 block text-muted">{labels.source}</span>
           <select name="source" defaultValue="MANUAL" className={fieldClass}>
             {SOURCES.map((source) => (
               <option key={source} value={source}>
-                {sourceLabel(source)}
+                {sourceLabels[source]}
               </option>
             ))}
           </select>
         </label>
       </div>
-      <button className={`${primaryButtonClass} disabled:cursor-not-allowed disabled:opacity-50`} disabled={visibleContacts.length === 0}>
-        Create lead
-      </button>
+      <BlobButton tone="action" disabled={visibleContacts.length === 0}>
+        {labels.create}
+      </BlobButton>
     </form>
   );
 }

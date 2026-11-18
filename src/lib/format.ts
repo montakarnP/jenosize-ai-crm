@@ -37,8 +37,8 @@ export function countLabel(count: number, singular: string): string {
   return `${count} ${count === 1 ? singular : `${singular}s`}`;
 }
 
-export function formatWhen(value: Date): string {
-  return new Intl.DateTimeFormat("en-GB", {
+export function formatWhen(value: Date, locale: "en" | "th" = "en"): string {
+  return new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Bangkok",

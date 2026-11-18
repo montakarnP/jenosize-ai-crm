@@ -21,7 +21,7 @@ JSON with:
 
 - `summary`: facts from the context only
 - `score`: integer 0–100
-- `reasons`: 1–5 short strings that cite stage, value, conversation, or the lost reason
+- `reasons`: 2–4 short strings that cite stage, value, conversation, or the lost reason
 - `nextAction`: the single next step for the salesperson
 - `draftReply`: a LINE message the contact has not received
 - `source`: `model` when a configured model returned valid JSON, otherwise `fallback`
@@ -63,3 +63,14 @@ These use the seeded leads and the fallback rules above.
 4. **Won.** Project sales desk (`lead_stay_booking`) is Won and 150,000 THB, with no inbound message. Score 96. Next action is a kickoff. The draft thanks the contact and does not ask them to buy again.
 5. **Lost.** Policy inbox cleanup (`lead_parts_rfq`) is Lost at 80,000 THB because the budget is frozen until next fiscal year. Score 14. The next action says to reopen only if that reason changes. The draft pauses the work and includes the lost reason.
 6. **Model missing or broken.** With no API key, or when the model response fails validation, cases 1–5 still return `source: fallback`. The lead stage and message count stay unchanged until the salesperson saves a draft.
+
+## LINE boundary
+
+LINE is a separate path from the suggestion. The copilot never calls it.
+
+- `POST /api/line/webhook` checks `X-Line-Signature` with HMAC-SHA256 over the raw body. A missing secret returns 503. A bad signature returns 401.
+- A phone connects by sending `I am` plus the contact's mock LINE id. If that phone or that id is already connected, the reply is `It's cannot connect because it's connected with other account.` A connected phone's later messages are stored on that contact's open lead.
+- The idempotency key is `line-event:{webhookEventId}`. A repeat of the same event returns duplicate and does not insert a second message.
+- A salesperson may save the draft as `DRAFT`. Approve and send is the only path that can mark it `SENT`.
+- `LINE_MODE=mock` records the send locally and does not call `api.line.me`. `LINE_MODE=live` replies with the latest reply token, or pushes to the LINE user, and retries once on HTTP 429, 5xx, or a network failure.
+- Channel secret and access token stay in the environment. They are not written to the skill, the seed, or git.

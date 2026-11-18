@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { recordCopilotSuggestion, saveLineDraft } from "@/lib/copilot-lead";
+import { parseChatLanguage, recordCopilotSuggestion, saveLineDraft } from "@/lib/copilot-lead";
 import { sendApprovedDraft } from "@/lib/line-send";
 import {
   addLeadNote,
@@ -11,8 +11,10 @@ import {
   createCompanyRecord,
   createContactRecord,
   createLeadRecord,
+  disconnectContactLine,
 } from "@/lib/crm-commands";
 import { parseSource, parseStage } from "@/lib/format";
+import { LOCALE_COOKIE, parseLocale } from "@/lib/i18n";
 import { readSession, sessionCookieOptions, SESSION_COOKIE } from "@/lib/session";
 import { signIn } from "@/lib/sign-in";
 
@@ -79,10 +81,22 @@ export async function addNote(formData: FormData) {
   redirect(`/leads/${leadId}`);
 }
 
+export async function setLocale(formData: FormData) {
+  const locale = parseLocale(String(formData.get("locale") ?? ""));
+  const next = String(formData.get("next") ?? "/");
+  const safe = next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  (await cookies()).set(LOCALE_COOKIE, locale, { path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 365 });
+  redirect(safe);
+}
+
 export async function askCopilot(formData: FormData) {
   const user = await requireUser();
   const leadId = String(formData.get("leadId") ?? "");
-  const result = await recordCopilotSuggestion({ leadId, actorId: user.uid });
+  const result = await recordCopilotSuggestion({
+    leadId,
+    actorId: user.uid,
+    chatLanguage: parseChatLanguage(formData.get("chatLanguage")),
+  });
   if (!result.ok) redirect("/leads");
   refreshLead(leadId);
   redirect(`/leads/${leadId}`);
@@ -95,6 +109,7 @@ export async function saveDraft(formData: FormData) {
     leadId,
     actorId: user.uid,
     body: String(formData.get("body") ?? ""),
+    chatLanguage: parseChatLanguage(formData.get("chatLanguage")),
   });
   if (!result.ok) {
     if (result.code === "not_found") redirect("/leads");
@@ -148,6 +163,15 @@ export async function createCompany(formData: FormData) {
   revalidatePath("/leads/new");
   revalidatePath("/contacts/new");
   redirect(`/companies/${result.companyId}`);
+}
+
+export async function disconnectLine(formData: FormData) {
+  const user = await requireUser();
+  if (user.role !== "ADMIN") redirect("/contacts");
+  await disconnectContactLine(String(formData.get("contactId") ?? ""));
+  revalidatePath("/contacts");
+  revalidatePath("/");
+  revalidatePath("/leads");
 }
 
 export async function createContact(formData: FormData) {

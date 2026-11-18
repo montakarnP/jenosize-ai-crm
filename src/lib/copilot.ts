@@ -43,7 +43,26 @@ function valueReason(valueThb: number): { delta: number; reason: string } {
   return { delta: -4, reason: "Deal value is under 100,000 THB." };
 }
 
-export function fallbackSuggestion(context: LeadContext): CopilotSuggestion {
+export type ChatLanguage = "en" | "th";
+
+function thaiDraft(context: LeadContext, name: string): string {
+  const reason = context.lostReason?.trim() || "ยังไม่ใช่เวลาที่เหมาะสม";
+  if (context.stage === "LOST") {
+    return `สวัสดีค่ะ ${name} เราขอพักงาน ${context.title} ไว้ก่อน ${reason} หากมีการเปลี่ยนแปลง ตอบกลับที่แชทนี้ได้เลยค่ะ`;
+  }
+  if (context.stage === "WON") {
+    return `สวัสดีค่ะ ${name} ขอบคุณที่ยืนยันงาน ${context.title} ดิฉันจะนัดเวลาเริ่มงานและแจ้งผู้รับผิดชอบจาก Jenosize ให้ค่ะ`;
+  }
+  if (context.stage === "PROPOSAL") {
+    return `สวัสดีค่ะ ${name} ขอติดตามข้อเสนอของงาน ${context.title} ค่ะ ตอนนี้มีจุดใดที่ยังติดการตัดสินใจอยู่บ้างคะ`;
+  }
+  if (context.stage === "QUALIFIED") {
+    return `สวัสดีค่ะ ${name} ดิฉันส่งสรุปขอบเขตงาน ${context.title} หนึ่งหน้าได้ค่ะ ต้องการตัดสินใจภายในวันไหนคะ`;
+  }
+  return `สวัสดีค่ะ ${name} ขอบคุณที่สอบถามเกี่ยวกับ ${context.title} ค่ะ สะดวกคุยสั้นๆ เพื่อยืนยันเป้าหมายและผู้รับผิดชอบฝั่งคุณหรือไม่คะ`;
+}
+
+export function fallbackSuggestion(context: LeadContext, chatLanguage: ChatLanguage = "en"): CopilotSuggestion {
   const name = contactName(context);
   const company = context.companyName?.trim() || "the company";
   const value = valueReason(context.valueThb);
@@ -71,7 +90,9 @@ export function fallbackSuggestion(context: LeadContext): CopilotSuggestion {
             : `Confirm ${name} is the right person and book a short discovery call.`;
 
   const draftReply =
-    context.stage === "LOST"
+    chatLanguage === "th"
+      ? thaiDraft(context, name)
+      : context.stage === "LOST"
       ? `Hello ${name}, we will pause ${context.title}. ${context.lostReason?.trim() || "The timing is not right"}. Reply here if that changes.`
       : context.stage === "WON"
         ? `Hello ${name}, thank you for confirming ${context.title}. I will propose a kickoff time and the Jenosize owner.`
@@ -126,8 +147,8 @@ function asSuggestion(value: unknown): CopilotSuggestion | null {
     !Number.isInteger(score) ||
     score < 0 ||
     score > 100 ||
-    reasons.length < 1 ||
-    reasons.length > 5 ||
+    reasons.length < 2 ||
+    reasons.length > 4 ||
     reasons.some((reason) => reason.length < 5 || reason.length > 200)
   ) {
     return null;
@@ -138,6 +159,7 @@ function asSuggestion(value: unknown): CopilotSuggestion | null {
 async function requestModel(
   config: { key: string; model: string; base: string },
   context: LeadContext,
+  chatLanguage: ChatLanguage,
 ): Promise<CopilotSuggestion | null> {
   const response = await fetch(`${config.base}/chat/completions`, {
     method: "POST",
@@ -153,7 +175,7 @@ async function requestModel(
         {
           role: "system",
           content:
-            "You are the Jenosize CRM copilot. Use only the JSON lead context. Do not invent meetings, budgets, or approvals. Return JSON with keys summary, score, reasons, nextAction, and draftReply. score is an integer from 0 to 100. reasons is an array of 2 to 4 short strings. draftReply is a proposed LINE message that has not been sent. If stage is LOST, the draft must pause the deal and mention the lost reason. Do not claim a message was sent or a stage was changed.",
+            `You are the Jenosize CRM copilot. Use only the JSON lead context. Do not invent meetings, budgets, or approvals. Return JSON with keys summary, score, reasons, nextAction, and draftReply. score is an integer from 0 to 100. reasons is an array of 2 to 4 short strings. draftReply is a proposed LINE message that has not been sent. Write draftReply in ${chatLanguage === "th" ? "Thai" : "English"}. Keep summary, reasons, and nextAction in English. If stage is LOST, the draft must pause the deal and mention the lost reason. Do not claim a message was sent or a stage was changed.`,
         },
         { role: "user", content: JSON.stringify(context) },
       ],
@@ -167,12 +189,15 @@ async function requestModel(
   return asSuggestion(JSON.parse(content));
 }
 
-export async function suggestForLead(context: LeadContext): Promise<CopilotSuggestion> {
-  const fallback = fallbackSuggestion(context);
+export async function suggestForLead(
+  context: LeadContext,
+  chatLanguage: ChatLanguage = "en",
+): Promise<CopilotSuggestion> {
+  const fallback = fallbackSuggestion(context, chatLanguage);
   const config = modelConfig();
   if (!config) return fallback;
   try {
-    const model = await requestModel(config, context);
+    const model = await requestModel(config, context, chatLanguage);
     if (!model) return { ...fallback, modelError: "invalid_output" };
     return model;
   } catch {
