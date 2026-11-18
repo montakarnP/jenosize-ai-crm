@@ -33,10 +33,6 @@ export function formatThb(value: number): string {
   }).format(value);
 }
 
-export function countLabel(count: number, singular: string): string {
-  return `${count} ${count === 1 ? singular : `${singular}s`}`;
-}
-
 export function formatWhen(value: Date, locale: "en" | "th" = "en"): string {
   return new Intl.DateTimeFormat(locale === "th" ? "th-TH" : "en-GB", {
     dateStyle: "medium",

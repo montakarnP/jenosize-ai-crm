@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { disconnectLine } from "@/app/actions";
 import { BlobButton, BlobLink } from "@/components/blob-button";
+import { LineStatus } from "@/components/line-status";
 import { FormPending } from "@/components/form-pending";
 import { listContacts } from "@/lib/crm";
 import { countText, getLocale, t } from "@/lib/i18n";
@@ -32,17 +33,18 @@ export default async function ContactsPage() {
             </p>
             <p className="mt-3 text-sm text-muted">{contact.email ?? t(locale, "contacts.noEmail")}</p>
             <p className="text-sm text-muted">{contact.phone ?? t(locale, "contacts.noPhone")}</p>
-            <p className="mt-3 text-sm">
-              <span className="text-muted">{t(locale, "contacts.mockId")} </span>
-              <span className="font-medium">{contact.lineCode}</span>
-            </p>
-            <p className="mt-1 text-sm">
-              <span className="text-muted">LINE </span>
-              <span className={contact.lineUserId ? "font-medium text-brand" : "text-muted"}>
-                {contact.lineUserId ? t(locale, "lead.connected") : t(locale, "lead.notConnected")}
-              </span>
-              <span className="text-muted"> · {countText(locale, "lead", contact._count.leads)}</span>
-            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              <p>
+                <span className="text-muted">{t(locale, "contacts.mockId")} </span>
+                <span className="font-medium">{contact.lineCode}</span>
+              </p>
+              <LineStatus
+                connected={Boolean(contact.lineUserId)}
+                connectedLabel={t(locale, "lead.connected")}
+                disconnectedLabel={t(locale, "lead.notConnected")}
+              />
+              <span className="text-muted">{countText(locale, "lead", contact._count.leads)}</span>
+            </div>
             {isAdmin && contact.lineUserId ? (
               <form action={disconnectLine} className="mt-3">
                 <FormPending />
