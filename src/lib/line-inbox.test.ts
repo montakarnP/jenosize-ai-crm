@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { prisma } from "./db";
-import { ingestLineEvent } from "./line-webhook";
+import { ingestLineEvent, ingestLineFollow, lineGreetingText } from "./line-webhook";
 
 test("the same LINE webhook event is stored once", async () => {
   const userId = `Udup${Date.now()}`;
@@ -22,6 +22,38 @@ test("the same LINE webhook event is stored once", async () => {
     const stored = await prisma.message.count({ where: { idempotencyKey: `line-event:${webhookEventId}` } });
     assert.equal(stored, 1);
   } finally {
+    await prisma.message.deleteMany({ where: { lineUserId: userId } });
+  }
+});
+
+test("adding the LINE account sends the greeting once", async () => {
+  const previousMode = process.env.LINE_MODE;
+  process.env.LINE_MODE = "mock";
+  const userId = `Ugreet${Date.now()}`;
+  const webhookEventId = `evt-follow-${userId}`;
+  const event = {
+    webhookEventId,
+    userId,
+    replyToken: "reply-greet",
+    timestamp: Date.now(),
+  };
+
+  try {
+    const first = await ingestLineFollow(event);
+    const second = await ingestLineFollow(event);
+    assert.equal(first.result, "accepted");
+    assert.equal(first.leadId, null);
+    assert.equal(second.result, "duplicate");
+    const stored = await prisma.message.findMany({
+      where: { idempotencyKey: `line-follow:${webhookEventId}` },
+      select: { body: true, status: true, direction: true },
+    });
+    assert.equal(stored.length, 1);
+    assert.equal(stored[0]?.body, lineGreetingText());
+    assert.equal(stored[0]?.status, "SENT");
+    assert.equal(stored[0]?.direction, "OUTBOUND");
+  } finally {
+    process.env.LINE_MODE = previousMode;
     await prisma.message.deleteMany({ where: { lineUserId: userId } });
   }
 });

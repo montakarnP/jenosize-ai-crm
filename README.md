@@ -22,6 +22,7 @@ LINE behavior:
 
 - Signature check and one automatic retry live in `src/lib/line-signature.ts` and `src/lib/line-send.ts`.
 - Every contact has a mock LINE id such as `LK-OISHI`. A phone connects by sending `I am LK-OISHI`. If that phone or that mock id is already connected, LINE replies that it cannot connect because it is connected with another account. An admin can disconnect from the Contacts page.
+- When someone adds the LINE Official Account, the follow event sends one greeting that explains `I am` plus the LINE id. The same follow event does not send it again. The key is `line-follow:{id}`.
 - Repeating `webhookEventId` is a duplicate. The unique key is `line-event:{id}`.
 - `.env.example` uses `LINE_MODE=mock`, so `npm test` and a fresh local app do not call LINE. The hosted demo is set to `live` on Vercel. A live send also needs `LINE_CHANNEL_ACCESS_TOKEN` in that environment, never in git.
 
@@ -175,7 +176,7 @@ Vercel keeps these lines in the function log. Search for `"event":"line.webhook"
 ## LINE test
 
 1. In LINE Developers, set the webhook to `https://jenosize-ai-crm-azure.vercel.app/api/line/webhook`, turn **Use webhook** on, and click **Verify**.
-2. In LINE Official Account Manager, open the test account named LK and show its QR code. Add that account from the phone.
+2. In LINE Official Account Manager, open the test account named LK and show its QR code. Leave the manager's own greeting empty so the new friend gets one welcome. Add that account from the phone. LINE sends the greeting that explains `I am` plus the LINE id.
 3. On Contacts, copy a mock LINE id such as `LK-OISHI`. From the phone send `I am LK-OISHI`. The contact status becomes Connected, and later messages from that phone appear on that contact's lead.
 4. Open Trade promotion workflow, choose **Ask copilot**, **Save draft**, then **Approve and send**.
 5. With `LINE_MODE=mock`, the send stays in the CRM. With `live`, LINE receives it only when the contact has the phone's real user id.

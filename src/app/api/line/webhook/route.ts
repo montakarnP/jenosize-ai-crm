@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { apiData, apiError } from "@/lib/api";
 import { lineSignaturesMatch } from "@/lib/line-signature";
-import { ingestLineEvent, readLineWebhook } from "@/lib/line-webhook";
+import { ingestLineEvent, ingestLineFollow, readLineWebhook } from "@/lib/line-webhook";
 
 export const runtime = "nodejs";
 
@@ -25,11 +25,19 @@ export async function POST(request: Request) {
   const parsed = readLineWebhook(payload);
   if (!parsed.ok) return apiError("invalid", "LINE webhook events are missing.", 400);
 
-  const counts = { accepted: 0, duplicates: 0 };
-  for (const event of parsed.events) {
-    const outcome = await ingestLineEvent(event);
-    if (outcome.result === "accepted") counts.accepted += 1;
-    else counts.duplicates += 1;
+  const counts = { accepted: 0, duplicates: 0, greetings: 0 };
+  const handled = [
+    ...parsed.events.map((event) => ({ greeting: false, run: () => ingestLineEvent(event) })),
+    ...parsed.follows.map((event) => ({ greeting: true, run: () => ingestLineFollow(event) })),
+  ];
+  for (const item of handled) {
+    const outcome = await item.run();
+    if (outcome.result === "accepted") {
+      if (item.greeting) counts.greetings += 1;
+      else counts.accepted += 1;
+    } else {
+      counts.duplicates += 1;
+    }
     if (outcome.leadId) {
       revalidatePath("/");
       revalidatePath("/leads");
@@ -42,7 +50,7 @@ export async function POST(request: Request) {
     JSON.stringify({
       event: "line.webhook",
       ...counts,
-      lineUserIds: parsed.events.map((item) => item.userId),
+      lineUserIds: [...parsed.events, ...parsed.follows].map((item) => item.userId),
     }),
   );
   return apiData(counts);
