@@ -221,7 +221,6 @@ On Vercel, search the function log for `"event":"line.webhook"` or `"event":"lin
 - A phone connects by sending `I am` plus that mock id. An admin disconnects it on Contacts. Sales users can see the status and cannot disconnect.
 - This LINE account cannot use the followers API, so the user id arrives from a webhook event.
 - There is no external error tracker. Logs stay in the Vercel function log.
-- The walkthrough is recorded from the deployed site. The recording is not stored in this repository.
 
 ## Production next steps
 
@@ -242,26 +241,3 @@ Sample prompts:
 - Connect a LINE Official Account: verify the webhook signature, store each event once, and send only after a person approves the draft.
 - Map a phone with `I am` plus a mock LINE id, and refuse the connection when that phone or that id is already connected.
 - Add English and Thai, a chat language on the LINE draft, and a New flag for an unread LINE message.
-
-Reviewed and rejected:
-
-- Pasted button CSS that would have turned the page dark, reset the fonts, or labeled every button "SUBMIT".
-- A loading overlay that stayed on screen after the page had finished loading.
-- Treating the LINE ID `lkade` as the webhook user id. That string is the display id, not `source.userId`.
-- Auto-creating a contact for every unknown phone. That would lock the phone to a new record and block `I am LK-OISHI`.
-
-One change after inspection: the copilot was allowed 1–5 reasons in the skill file and 2–4 in the model prompt. The skill, the prompt, and the output checker were then all set to 2–4 reasons. A second inspection found approved sends reusing a spent reply token and receiving HTTP 400. Approved sends now push, and that path is covered by `src/lib/line-send.test.ts`.
-
-## Walkthrough
-
-A 3–5 minute recording from https://jenosize-ai-crm-azure.vercel.app. Do not show `.env` or a token.
-
-1. Sign in as `admin@jenosize.test`.
-2. Filter to Qualified and LINE. Open Trade promotion workflow.
-3. Ask the copilot. The score and the reasons are on the timeline, and the stage is unchanged.
-4. Save the LINE draft, then approve it. The timeline keeps the suggestion, the draft, and the sent message.
-5. Show one inbound LINE message, including the New flag when it has not been seen yet.
-6. On Contacts, show Connected for `LK-OISHI`.
-7. Close on this repository, `npm test`, and the rule that the copilot cannot send by itself.
-
-If the model is slow, the fallback still scores the lead. If Approve and send shows a LINE error, the draft is still unsent and the failure is stored. Retry once at most while recording.
