@@ -118,6 +118,41 @@ The browser signs in and reads the pipeline from Postgres. Ask copilot reads one
 
 An open CRM polls `GET /api/inbox/revision` about every two seconds and refreshes when a message or a connection changes. Opening a lead marks its inbound LINE messages seen. The New flag stays for that visit, so the salesperson can still see which message just arrived.
 
+## Workflow
+
+A lead stays on one timeline. The salesperson moves the stage and approves the reply. LINE only adds a message after the signature check, and only sends after a person approves.
+
+```mermaid
+flowchart TD
+  arrive[Website, manual entry, or LINE] --> board[Pipeline]
+  board --> lead[Open the lead]
+  lead --> stage[Move the stage]
+  stage --> lost{Lost?}
+  lost -->|Yes| reason[Save the lost reason]
+  lost -->|No| timeline[Timeline]
+  reason --> timeline
+  lead --> ask[Ask copilot]
+  ask --> suggestion[Store the suggestion only]
+  suggestion --> draft[Save the LINE draft]
+  draft --> approve[Approve and send]
+  approve --> linked{Phone connected?}
+  linked -->|Yes| sent[Push and mark sent]
+  linked -->|No| held[Keep the draft unsent]
+  sent --> timeline
+  phone[Phone messages the account] --> signature[Check the signature]
+  signature -->|Invalid| reject[Reject the event]
+  signature -->|Valid| once[Store the event once]
+  once --> claim{I am plus a mock id?}
+  claim -->|Free id| connect[Connect the contact]
+  claim -->|Already taken| blocked[Reply that another account holds it]
+  claim -->|No| known{Phone already connected?}
+  connect --> known
+  known -->|Yes| inbound[Add the message to the open lead]
+  known -->|No| unmatched[Store it without a contact]
+  inbound --> timeline
+  timeline --> refresh[Refresh the open CRM]
+```
+
 ## API
 
 CRM routes require the `crm_session` cookie from `POST /api/auth/login`. `POST /api/line/webhook` is public and requires a valid `X-Line-Signature`.
