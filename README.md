@@ -83,7 +83,7 @@ The database checks:
 
 The API returns `lost_reason` with HTTP 400 when that reason is missing. Responses never include password hashes, channel secrets, or access tokens.
 
-The seed creates 9 users, 20 companies, 20 contacts, 10 leads, 8 activities, and 3 messages. The hosted database also keeps LINE events from the test phone. Those events are real traffic on the test account, not rows in the seed file.
+The seed creates 9 users, 20 companies, 20 contacts, 20 leads, 16 activities, and 5 messages. Every company has one lead. The hosted database also keeps LINE events from the test phone. Those events are real traffic on the test account, not rows in the seed file.
 
 ## Architecture
 
