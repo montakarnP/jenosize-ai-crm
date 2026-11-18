@@ -2,6 +2,8 @@
 
 Working AI CRM MVP for the Jenosize lead-engineer assignment.
 
+Developed by MONTAKARN PRINGPRERD · m.pringprerd@gmail.com
+
 ## Status
 
 Public demo: https://jenosize-ai-crm-azure.vercel.app
