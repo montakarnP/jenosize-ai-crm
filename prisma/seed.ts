@@ -95,7 +95,8 @@ const companies = [
 ];
 
 const contacts = [
-  { id: "ct_cpall", lineCode: "LK-CPALL", companyId: "co_cpall", name: "CPALL Contact", email: "cpall@example.test", phone: "+66-80-000-0101", title: "Contact", lineUserId: null },
+  { id: "ct_cpall", lineCode: "LK-CPALL", companyId: "co_cpall", name: "CPALL Contact", email: "cpall@example.test", phone: "+66-80-000-0101", title: "Commercial", lineUserId: null },
+  { id: "ct_cpall_ops", lineCode: "LK-CPALL-OPS", companyId: "co_cpall", name: "CPALL Store Operations", email: "cpall.ops@example.test", phone: "+66-80-000-0107", title: "Store operations", lineUserId: null },
   { id: "ct_themall", lineCode: "LK-THEMALL", companyId: "co_themall", name: "THEMALL Contact", email: "themall@example.test", phone: "+66-80-000-0102", title: "Contact", lineUserId: null },
   { id: "ct_bigc", lineCode: "LK-BIGC", companyId: "co_bigc", name: "BigC Contact", email: "bigc@example.test", phone: "+66-80-000-0103", title: "Contact", lineUserId: null },
   { id: "ct_cpn", lineCode: "LK-CPN", companyId: "co_cpn", name: "CPN Contact", email: "cpn@example.test", phone: "+66-80-000-0104", title: "Contact", lineUserId: null },
@@ -353,6 +354,28 @@ const leads: LeadSeed[] = [
     valueThb: 115000,
     createdAt: "2026-11-11T03:45:00.000Z",
   },
+  {
+    id: "lead_cpall_delivery",
+    title: "Night delivery window",
+    companyId: "co_cpall",
+    contactId: "ct_cpall",
+    ownerId: "user_anna",
+    stage: "QUALIFIED",
+    source: "WEBSITE",
+    valueThb: 190000,
+    createdAt: "2026-11-12T02:20:00.000Z",
+  },
+  {
+    id: "lead_cpall_franchise",
+    title: "Franchise onboarding desk",
+    companyId: "co_cpall",
+    contactId: "ct_cpall_ops",
+    ownerId: "user_erik",
+    stage: "NEW",
+    source: "MANUAL",
+    valueThb: 140000,
+    createdAt: "2026-11-15T06:10:00.000Z",
+  },
 ];
 
 async function main() {
@@ -520,6 +543,22 @@ async function main() {
         type: "NOTE",
         body: "Watson Contact asked for a pilot in three stores before a wider rollout.",
         createdAt: new Date("2026-11-13T04:25:00.000Z"),
+      },
+      {
+        id: "act_cpall_delivery",
+        leadId: "lead_cpall_delivery",
+        actorId: "user_anna",
+        type: "NOTE",
+        body: "Second lead for CPALL Contact. The store visit checklist stays a separate deal.",
+        createdAt: new Date("2026-11-12T03:00:00.000Z"),
+      },
+      {
+        id: "act_cpall_franchise",
+        leadId: "lead_cpall_franchise",
+        actorId: "user_erik",
+        type: "SYSTEM",
+        body: "Lead created for CPALL Store Operations, the second contact at CP ALL.",
+        createdAt: new Date("2026-11-15T06:10:00.000Z"),
       },
     ],
   });
