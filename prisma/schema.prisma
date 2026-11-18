@@ -1,0 +1,159 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+enum UserRole {
+  ADMIN
+  SALES
+}
+
+enum LeadStage {
+  NEW
+  QUALIFIED
+  PROPOSAL
+  WON
+  LOST
+}
+
+enum LeadSource {
+  WEBSITE
+  MANUAL
+  LINE
+}
+
+enum ActivityType {
+  NOTE
+  STAGE_CHANGE
+  AI_SUGGESTION
+  LINE_MESSAGE
+  SYSTEM
+}
+
+enum MessageChannel {
+  LINE
+  INTERNAL
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum MessageStatus {
+  RECEIVED
+  DRAFT
+  APPROVED
+  SENT
+  FAILED
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  title        String
+  passwordHash String
+  role         UserRole   @default(SALES)
+  createdAt    DateTime   @default(now())
+  leads        Lead[]     @relation("LeadOwner")
+  activities   Activity[]
+
+  @@map("users")
+}
+
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  industry  String?
+  website   String?
+  employees Int?
+  createdAt DateTime  @default(now())
+  contacts  Contact[]
+  leads     Lead[]
+
+  @@index([name])
+  @@map("companies")
+}
+
+model Contact {
+  id         String    @id @default(cuid())
+  companyId  String?
+  company    Company?  @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  name       String
+  email      String?   @unique
+  phone      String?
+  title      String?
+  lineUserId String?   @unique
+  createdAt  DateTime  @default(now())
+  leads      Lead[]
+  messages   Message[]
+
+  @@index([name])
+  @@map("contacts")
+}
+
+model Lead {
+  id         String     @id @default(cuid())
+  title      String
+  companyId  String?
+  company    Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contactId  String?
+  contact    Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  ownerId    String?
+  owner      User?      @relation("LeadOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+  stage      LeadStage  @default(NEW)
+  source     LeadSource @default(MANUAL)
+  valueThb   Int        @default(0)
+  lostReason String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  activities Activity[]
+  messages   Message[]
+
+  @@index([stage])
+  @@index([ownerId])
+  @@index([updatedAt])
+  @@map("leads")
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  leadId    String
+  lead      Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  type      ActivityType
+  body      String
+  metadata  Json?
+  createdAt DateTime     @default(now())
+
+  @@index([leadId, createdAt])
+  @@map("activities")
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  leadId         String?
+  lead           Lead?            @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  contactId      String?
+  contact        Contact?         @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  channel        MessageChannel
+  direction      MessageDirection
+  status         MessageStatus
+  body           String
+  externalId     String?
+  idempotencyKey String?          @unique
+  replyToken     String?
+  error          String?
+  createdAt      DateTime         @default(now())
+
+  @@unique([channel, externalId])
+  @@index([leadId, createdAt])
+  @@map("messages")
+}
