@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { addNote, askCopilot, saveDraft, sendLine } from "@/app/actions";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
+import { LineStatus } from "@/components/line-status";
 import { MarkSeen, NewFlag } from "@/components/new-flag";
 import { StageBadge } from "@/components/stage-badge";
 import { StageForm } from "@/components/stage-form";
@@ -179,11 +180,13 @@ export default async function LeadDetailPage({
               </div>
               <div>
                 <dt className="text-muted">{t(locale, "lead.line")}</dt>
-                <dd>
-                  {lead.contact?.lineCode ?? "—"}
-                  <span className="block text-muted">
-                    {lead.contact?.lineUserId ? t(locale, "lead.connected") : t(locale, "lead.notConnected")}
-                  </span>
+                <dd className="flex flex-wrap items-center gap-2">
+                  <span>{lead.contact?.lineCode ?? "—"}</span>
+                  <LineStatus
+                    connected={Boolean(lead.contact?.lineUserId)}
+                    connectedLabel={t(locale, "lead.connected")}
+                    disconnectedLabel={t(locale, "lead.notConnected")}
+                  />
                 </dd>
               </div>
               <div>
