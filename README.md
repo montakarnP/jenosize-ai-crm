@@ -6,6 +6,8 @@ Working AI CRM MVP for the Jenosize lead-engineer assignment.
 
 Public demo: https://jenosize-ai-crm-azure.vercel.app
 
+Source: https://github.com/montakarnP/jenosize-ai-crm
+
 Sign in with `admin@jenosize.test` and password `Demo-CRM-2026`. The same password works for every seeded account. Data is in hosted Postgres, so a refresh keeps the pipeline.
 
 `POST /api/line/webhook` checks the LINE signature and stores each text event once. A known LINE user is attached to the open lead. Copilot suggestions do not change the stage and do not send LINE. A CRM request without a session gets `401`. A bad webhook signature gets `401`.
@@ -56,9 +58,11 @@ CRM routes require the `crm_session` cookie from `POST /api/auth/login`. `POST /
 | GET | `/api/leads/:id` | Lead, profile, messages, and timeline |
 | PATCH | `/api/leads/:id` | `{ "stage", "lostReason?" }` |
 | POST | `/api/leads/:id/notes` | `{ "body" }` |
-| POST | `/api/leads/:id/copilot` | Summary, score, next action, and LINE draft. Does not send or change stage |
-| POST | `/api/leads/:id/drafts` | `{ "body" }` saves an unsent LINE draft |
-| POST | `/api/leads/:id/messages/:messageId/send` | Approves one draft. Mock mode does not call LINE |
+| POST | `/api/leads/:id/copilot` | `{ "chatLanguage"? : "en" or "th" }`. Summary, score, next action, and LINE draft. Does not send or change stage |
+| POST | `/api/leads/:id/drafts` | `{ "body", "chatLanguage"? }` saves an unsent LINE draft |
+| POST | `/api/leads/:id/messages/:messageId/send` | Approves one draft. Mock mode does not call LINE. Live mode pushes to the connected user |
+| POST | `/api/leads/:id/seen` | Marks inbound LINE messages on that lead as seen |
+| GET | `/api/inbox/revision` | Changes when a message or a LINE connection changes, so an open page can refresh |
 | POST | `/api/line/webhook` | Signed LINE events. Repeating an event id does not create a second message |
 | GET | `/api/companies` | Company list |
 | POST | `/api/companies` | `{ "name", "industry" }` using one of the six industries |
@@ -91,6 +95,8 @@ Seeded demo logins all use the password `Demo-CRM-2026`:
 - `jom@jenosize.test` — Phiboontapp (Jom) Kongkunchad, Asst. Director, Event
 - `zam@jenosize.test` — Patipan (Zam) Plangpattanapanich, Business Development Director
 - `lisa@jenosize.test` — Lisa Tham, Head of Product Design & Quality
+- `jenosize.sales@jenosize.test` — Jenosize Sales
+- `jenosize.admin@jenosize.test` — Jenosize Admin
 - `admin@jenosize.test` — Admin
 
 Synthetic seed counts: 9 users, 20 companies, 20 contacts, 10 leads, 8 activities, and 3 messages. Companies are grouped as Retail, Fashion, Government, FMCG, Banking & Insurance, and Real Estate. Leads cover New, Qualified, Proposal, Won, and Lost.
@@ -124,7 +130,7 @@ flowchart LR
   nextApp --> lineApi
 ```
 
-The browser signs in and reads the pipeline from Postgres. Ask copilot reads one lead and writes only an `AI_SUGGESTION`. Save draft writes a `DRAFT` message. Approve and send is the only step that calls LINE, and only when `LINE_MODE=live`. LINE posts inbound text to `/api/line/webhook`. The handler checks the signature, stores the event once, and links it when `lineUserId` matches a contact.
+The browser signs in and reads the pipeline from Postgres. Ask copilot reads one lead and writes only an `AI_SUGGESTION`. Save draft writes a `DRAFT` message. Approve and send is the only step that calls LINE, and only when `LINE_MODE=live`. It pushes to the connected LINE user. A reply token is used only for the immediate reply to `I am …`, and a rejected reply is pushed instead. LINE posts inbound text to `/api/line/webhook`. The handler checks the signature, stores the event once, and attaches it when the phone is already connected or when the text claims a free mock LINE id.
 
 ## Trade-offs
 
@@ -136,19 +142,18 @@ The browser signs in and reads the pipeline from Postgres. Ask copilot reads one
 
 ## Limitations
 
-- Seeded LINE ids `UdemoLineUser0001` and `UdemoLineUser0002` are not real phones. A live send to those ids is rejected by LINE.
-- A phone connects only by sending `I am` plus a mock LINE id. An admin disconnects it on the Contacts page. Sales users can see the status and cannot disconnect.
+- A live send is refused until the contact is Connected. The visible id, such as `LK-OISHI`, is a mock code, not the LINE user id.
+- A phone connects only by sending `I am` plus that mock id. An admin disconnects it on the Contacts page. Sales users can see the status and cannot disconnect.
 - This LINE account cannot use the followers API, so the id has to come from a webhook event.
 - There is no external error tracker. Logs stay in the Vercel function log.
 - The walkthrough video is not in the repository. Record it from the deployed site.
 
 ## Production next steps
 
-1. Attach the tester's real LINE user id to Oishi Contact, then approve one draft and confirm it arrives on the phone.
+1. Record the 3–5 minute walkthrough from the deployed site.
 2. Reissue the LINE channel access token if it has been pasted into a chat, and update only the Vercel environment.
-3. Publish this git repository without `.env`.
-4. Record the 3–5 minute walkthrough below.
-5. Alert when `line.send` logs `"status":"FAILED"` or `line.webhook` logs `"reason":"signature"`.
+3. Alert when `line.send` logs `"status":"FAILED"` or `line.webhook` logs `"reason":"signature"`.
+4. Add company and contact editing when the team needs to correct a record without creating a new one.
 
 ## Logging and monitoring
 
