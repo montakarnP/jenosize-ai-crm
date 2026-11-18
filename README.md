@@ -48,17 +48,7 @@ Open http://localhost:3000. The local database URL is `postgresql://crm:crm@loca
 npm test
 ```
 
-Seeded accounts, all with password `Demo-CRM-2026`:
-
-- `max@jenosize.test` — Nattasate (Max) Trithipcharoenchai, CEO & Founder
-- `aoy@jenosize.test` — Pinyapat (Aoy) Trithipcharoenchai, Director
-- `tak@jenosize.test` — Kanchaporn (Tak) Kiatnawin, Managing Director, Digital
-- `jom@jenosize.test` — Phiboontapp (Jom) Kongkunchad, Asst. Director, Event
-- `zam@jenosize.test` — Patipan (Zam) Plangpattanapanich, Business Development Director
-- `lisa@jenosize.test` — Lisa Tham, Head of Product Design & Quality
-- `jenosize.sales@jenosize.test` — Jenosize Sales
-- `jenosize.admin@jenosize.test` — Jenosize Admin
-- `admin@jenosize.test` — Admin
+Every seeded account uses the password `Demo-CRM-2026`. The login page shows `admin@jenosize.test`. Sales demo accounts are `jenosize.sales@jenosize.test` and `jenosize.admin@jenosize.test`.
 
 Do not commit `.env`. Do not run `npm run db:reset` against the hosted database.
 
