@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { AppLink as Link } from "@/components/app-link";
+import { NavLinks } from "@/components/nav-links";
+import { getLocale, t } from "@/lib/i18n";
 
-export function PageFrame({
+export async function PageFrame({
   title,
   hint,
   action,
@@ -16,6 +18,8 @@ export function PageFrame({
   back?: { href: string; label: string };
   children: ReactNode;
 }) {
+  const locale = await getLocale();
+
   return (
     <>
       <section className="crm-hero">
@@ -39,6 +43,19 @@ export function PageFrame({
           </div>
         </div>
       </section>
+      <div className="crm-subnav">
+        <div className="container-fluid">
+          <NavLinks
+            links={[
+              { href: "/", label: t(locale, "nav.pipeline") },
+              { href: "/leads", label: t(locale, "nav.leads") },
+              { href: "/companies", label: t(locale, "nav.companies") },
+              { href: "/contacts", label: t(locale, "nav.contacts") },
+              { href: "/team", label: t(locale, "nav.team") },
+            ]}
+          />
+        </div>
+      </div>
       <div className="container-fluid crm-canvas">{children}</div>
     </>
   );

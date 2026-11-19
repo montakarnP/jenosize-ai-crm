@@ -486,8 +486,16 @@ a {
   text-decoration: underline;
 }
 
+.crm-subnav {
+  padding-top: 1.25rem;
+}
+
+.crm-subnav .nav-links {
+  justify-content: center;
+}
+
 .crm-canvas {
-  padding-top: 1.75rem;
+  padding-top: 1.25rem;
   padding-bottom: 2.75rem;
 }
 
