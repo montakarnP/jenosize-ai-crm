@@ -257,7 +257,7 @@ On Vercel, search the function log for `"event":"line.webhook"` or `"event":"lin
 
 ## How this was built
 
-The app was built with an AI coding assistant in Cursor. A person checked the running app, the tests, and the skill text, then kept or rejected the result.
+The app was built with an AI coding assistant in Cursor. A person checked the running app, the tests, and `skills/crm-copilot/SKILL.md` before keeping a result.
 
 Sample prompts:
 
@@ -266,3 +266,13 @@ Sample prompts:
 - Connect a LINE Official Account: verify the webhook signature, store each event once, and send only after a person approves the draft.
 - Map a phone with `I am` plus a mock LINE id, and refuse the connection when that phone or that id is already connected.
 - Add English and Thai, a chat language on the LINE draft, and a New flag for an unread LINE message.
+
+Reviewed and rejected:
+
+- A copilot action that sends LINE or changes the stage. Ask copilot writes an `AI_SUGGESTION` only. Save draft and Approve and send stay separate.
+- Drag-and-drop stage changes. Move stage and Save stage keep a Lost reason on the timeline, and the database check requires that reason.
+- The full Bootstrap stylesheet. Its utility classes overrode the app styles, so the app imports only the Bootstrap grid.
+
+Change after inspection:
+
+The five seeded copilot cases were run against the fallback and compared with the skill text. Trade promotion workflow stays at 72, for Qualified, a value of at least 200,000 THB, and an open LINE conversation. `src/lib/copilot.test.ts` asserts that score and asserts that asking for a suggestion creates no outbound message.
