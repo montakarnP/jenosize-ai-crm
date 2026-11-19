@@ -1,4 +1,4 @@
-import { AppLink as Link } from "@/components/app-link";
+import { PageFrame } from "@/components/page-frame";
 import { notFound } from "next/navigation";
 import { addNote, askCopilot, saveDraft, sendLine } from "@/app/actions";
 import { BlobButton } from "@/components/blob-button";
@@ -88,23 +88,18 @@ export default async function LeadDetailPage({
   );
 
   return (
-    <main>
+    <PageFrame
+      back={{ href: "/leads", label: t(locale, "lead.back") }}
+      title={
+        <span className="inline-flex flex-wrap items-center gap-2">
+          {lead.title}
+          <StageBadge stage={lead.stage} label={stageText(locale, lead.stage)} />
+        </span>
+      }
+      hint={`${lead.company?.name ?? t(locale, "common.noCompany")} · ${sourceLabel(lead.source)} · ${formatThb(lead.valueThb)}`}
+    >
       <MarkSeen leadId={lead.id} enabled={timeline.some((item) => item.fresh)} />
-      <Link href="/leads" className="text-sm text-brand">
-        {t(locale, "lead.back")}
-      </Link>
-      <div className="mt-3 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{lead.title}</h1>
-            <StageBadge stage={lead.stage} label={stageText(locale, lead.stage)} />
-          </div>
-          <p className="mt-2 text-sm break-words text-muted">
-            {lead.company?.name ?? t(locale, "common.noCompany")} · {sourceLabel(lead.source)} · {formatThb(lead.valueThb)}
-          </p>
-        </div>
-      </div>
-      {errorMessage ? <p className="mt-4 text-sm text-red-800">{errorMessage}</p> : null}
+      {errorMessage ? <p className="mb-4 text-sm text-red-800">{errorMessage}</p> : null}
       <section className={`mt-6 p-4 ${cardClass}`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -157,7 +152,9 @@ export default async function LeadDetailPage({
           <p className="mt-4 text-sm text-muted">{t(locale, "lead.noSuggestion")}</p>
         )}
       </section>
-      <div className="mt-6 grid gap-6 lg:grid-cols-[18rem_1fr]">
+      <div className="mt-6">
+      <div className="row g-4">
+        <div className="col-lg-4">
         <aside className="space-y-4">
           <section className={`p-4 ${cardClass}`}>
             <h2 className="text-sm font-medium">{t(locale, "lead.profile")}</h2>
@@ -221,6 +218,8 @@ export default async function LeadDetailPage({
             </div>
           </section>
         </aside>
+        </div>
+        <div className="col-lg-8">
         <section className={`p-4 ${cardClass}`}>
           <h2 className="text-sm font-medium">{t(locale, "lead.timeline")}</h2>
           <ol className="mt-4 space-y-4">
@@ -269,7 +268,9 @@ export default async function LeadDetailPage({
             <BlobButton tone="action">{t(locale, "lead.saveNote")}</BlobButton>
           </form>
         </section>
+        </div>
       </div>
-    </main>
+      </div>
+    </PageFrame>
   );
 }

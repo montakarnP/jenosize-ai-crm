@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "bootstrap/dist/css/bootstrap-grid.css";
 
 @theme {
   --color-ink: #020817;
@@ -15,7 +16,7 @@ html {
 
 body {
   color: var(--color-ink);
-  background: #ffffff;
+  background: var(--color-mist);
 }
 
 body::before {
@@ -392,4 +393,141 @@ a {
   .nav-links .blob-btn.is-active .blob-btn__blob {
     transform: translateZ(0) scale(1.4);
   }
+}
+
+.tone-blob--inverse {
+  --blob: #ffffff;
+  color: #ffffff;
+}
+
+.tone-blob--inverse .blob-btn__inner {
+  background: transparent;
+}
+
+.tone-blob--inverse:hover {
+  color: #204cd5;
+}
+
+.crm-shell {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow-x: clip;
+  background: #f3f7fd;
+}
+
+.crm-main {
+  flex: 1;
+}
+
+.crm-nav {
+  background: #204cd5;
+  color: #ffffff;
+}
+
+.crm-nav .nav-links .blob-btn {
+  color: #ffffff;
+}
+
+.crm-nav .nav-links .blob-btn:before {
+  border-color: #ffffff;
+}
+
+.crm-nav .nav-links .blob-btn__inner {
+  background: transparent;
+}
+
+.crm-nav .nav-links .blob-btn__blob {
+  background: #ffffff;
+}
+
+.crm-nav .nav-links .blob-btn:hover,
+.crm-nav .nav-links .blob-btn.is-active {
+  color: #204cd5;
+}
+
+.crm-hero {
+  background: linear-gradient(105deg, #00d2ff 0%, #204cd5 58%, #16348f 100%);
+  color: #ffffff;
+}
+
+.crm-hero .container-fluid {
+  padding-top: 2rem;
+  padding-bottom: 2.25rem;
+}
+
+.crm-hero__title {
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-prompt), sans-serif;
+  font-size: clamp(1.75rem, 3vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.crm-hero__hint {
+  margin-top: 0.55rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.crm-hero__back {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.crm-hero__back:hover {
+  text-decoration: underline;
+}
+
+.crm-canvas {
+  padding-top: 1.75rem;
+  padding-bottom: 2.75rem;
+}
+
+.crm-quick {
+  overflow: hidden;
+  border-radius: 2px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(2, 8, 23, 0.16);
+}
+
+.crm-quick h2 {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: #204cd5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.crm-quick a {
+  display: block;
+  padding: 0.72rem 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  background: #204cd5;
+  color: #ffffff;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.crm-quick a:hover {
+  background: #16348f;
+}
+
+.crm-footer {
+  background: #020817;
+  color: #ffffff;
+}
+
+.crm-login {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #00d2ff 0%, #204cd5 52%, #020817 100%);
 }

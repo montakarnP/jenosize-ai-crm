@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { disconnectLine } from "@/app/actions";
+import { PageFrame } from "@/components/page-frame";
 import { BlobButton, BlobLink } from "@/components/blob-button";
 import { LineStatus } from "@/components/line-status";
 import { FormPending } from "@/components/form-pending";
@@ -15,18 +16,20 @@ export default async function ContactsPage() {
   const isAdmin = session?.role === "ADMIN";
 
   return (
-    <main>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t(locale, "contacts.title")}</h1>
-          <p className="mt-1 text-sm text-muted">{t(locale, "contacts.count", { count: contacts.length })}</p>
-          <p className="mt-2 text-sm text-muted">{t(locale, "contacts.hint")}</p>
-        </div>
-        <BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>
-      </div>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <PageFrame
+      title={t(locale, "contacts.title")}
+      hint={
+        <>
+          <p>{t(locale, "contacts.count", { count: contacts.length })}</p>
+          <p className="mt-1">{t(locale, "contacts.hint")}</p>
+        </>
+      }
+      action={<BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>}
+    >
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
         {contacts.map((contact) => (
-          <article key={contact.id} className={`p-4 ${cardClass}`}>
+          <div className="col" key={contact.id}>
+          <article className={`h-full p-4 ${cardClass}`}>
             <p className="font-medium">{contact.name}</p>
             <p className="mt-1 text-sm text-muted">
               {contact.title ?? t(locale, "contacts.noTitle")} · {contact.company?.name ?? t(locale, "common.noCompany")}
@@ -53,8 +56,9 @@ export default async function ContactsPage() {
               </form>
             ) : null}
           </article>
+          </div>
         ))}
       </div>
-    </main>
+    </PageFrame>
   );
 }

@@ -1,5 +1,5 @@
-import { AppLink as Link } from "@/components/app-link";
 import { createCompany } from "@/app/actions";
+import { PageFrame } from "@/components/page-frame";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
 import { industries } from "@/lib/industries";
@@ -17,14 +17,15 @@ export default async function NewCompanyPage({
     error === "duplicate" ? t(locale, "companies.duplicate") : error === "invalid" ? t(locale, "companies.invalid") : null;
 
   return (
-    <main className="max-w-xl">
-      <Link href="/companies" className="text-sm text-brand">
-        {t(locale, "companies.back")}
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">{t(locale, "companies.new")}</h1>
-      <p className="mt-1 text-sm text-muted">{t(locale, "companies.newHint")}</p>
-      {message ? <p className="mt-4 text-sm text-red-800">{message}</p> : null}
-      <form action={createCompany} className={`mt-6 space-y-4 p-5 ${cardClass}`}>
+    <PageFrame
+      back={{ href: "/companies", label: t(locale, "companies.back") }}
+      title={t(locale, "companies.new")}
+      hint={t(locale, "companies.newHint")}
+    >
+      {message ? <p className="mb-4 text-sm text-red-800">{message}</p> : null}
+      <div className="row">
+        <div className="col-lg-6">
+      <form action={createCompany} className={`space-y-4 p-5 ${cardClass}`}>
         <FormPending />
         <label className="block text-sm">
           <span className="mb-1 block text-muted">{t(locale, "companies.name")}</span>
@@ -42,6 +43,8 @@ export default async function NewCompanyPage({
         </label>
         <BlobButton tone="action">{t(locale, "companies.save")}</BlobButton>
       </form>
-    </main>
+        </div>
+      </div>
+    </PageFrame>
   );
 }

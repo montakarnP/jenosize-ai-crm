@@ -1,6 +1,7 @@
 import { AppLink as Link } from "@/components/app-link";
 import { BlobLink } from "@/components/blob-button";
 import { Filters } from "@/components/filters";
+import { PageFrame } from "@/components/page-frame";
 import { StageBadge } from "@/components/stage-badge";
 import { UnreadBadge } from "@/components/unread-badge";
 import { listLeads } from "@/lib/crm";
@@ -19,17 +20,12 @@ export default async function LeadsPage({
   const leads = await listLeads(readFilters(params));
 
   return (
-    <main>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t(locale, "leads.title")}</h1>
-          <p className="mt-1 text-sm text-muted">{t(locale, "leads.count", { count: leads.length })}</p>
-        </div>
-        <BlobLink href="/leads/new">{t(locale, "pipeline.newLead")}</BlobLink>
-      </div>
-      <div className="mt-5">
-        <Filters action="/leads" q={params.q ?? ""} stage={params.stage ?? ""} source={params.source ?? ""} />
-      </div>
+    <PageFrame
+      title={t(locale, "leads.title")}
+      hint={t(locale, "leads.count", { count: leads.length })}
+      action={<BlobLink href="/leads/new">{t(locale, "pipeline.newLead")}</BlobLink>}
+    >
+      <Filters action="/leads" q={params.q ?? ""} stage={params.stage ?? ""} source={params.source ?? ""} />
       <div className="mt-6 space-y-3 md:hidden">
         {leads.length === 0 ? <p className="text-sm text-muted">{t(locale, "leads.empty")}</p> : null}
         {leads.map((lead) => (
@@ -93,6 +89,6 @@ export default async function LeadsPage({
           </tbody>
         </table>
       </div>
-    </main>
+    </PageFrame>
   );
 }

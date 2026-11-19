@@ -1,5 +1,6 @@
 import { AppLink as Link } from "@/components/app-link";
 import { notFound } from "next/navigation";
+import { PageFrame } from "@/components/page-frame";
 import { StageBadge } from "@/components/stage-badge";
 import { getCompany } from "@/lib/crm";
 import { formatThb } from "@/lib/format";
@@ -13,17 +14,13 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   if (!company) notFound();
 
   return (
-    <main>
-      <Link href="/companies" className="text-sm text-brand">
-        {t(locale, "companies.back")}
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">{company.name}</h1>
-      <p className="mt-1 text-sm text-muted">
-        {company.industry ?? t(locale, "companies.noIndustry")}
-        {company.employees != null ? ` · ${t(locale, "companies.people", { count: company.employees })}` : ""}
-      </p>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section>
+    <PageFrame
+      back={{ href: "/companies", label: t(locale, "companies.back") }}
+      title={company.name}
+      hint={`${company.industry ?? t(locale, "companies.noIndustry")}${company.employees != null ? ` · ${t(locale, "companies.people", { count: company.employees })}` : ""}`}
+    >
+      <div className="row g-4">
+        <section className="col-lg-6">
           <h2 className="text-sm font-medium">{t(locale, "companies.contacts")}</h2>
           <ul className="mt-3 space-y-2">
             {company.contacts.map((contact) => (
@@ -35,7 +32,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             ))}
           </ul>
         </section>
-        <section>
+        <section className="col-lg-6">
           <h2 className="text-sm font-medium">{t(locale, "companies.leads")}</h2>
           <ul className="mt-3 space-y-2">
             {company.leads.map((lead) => (
@@ -54,6 +51,6 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
           </ul>
         </section>
       </div>
-    </main>
+    </PageFrame>
   );
 }

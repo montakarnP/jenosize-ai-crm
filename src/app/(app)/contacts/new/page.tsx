@@ -1,5 +1,5 @@
-import { AppLink as Link } from "@/components/app-link";
 import { createContact } from "@/app/actions";
+import { PageFrame } from "@/components/page-frame";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
 import { listCompanies } from "@/lib/crm";
@@ -24,14 +24,15 @@ export default async function NewContactPage({
           : null;
 
   return (
-    <main className="max-w-xl">
-      <Link href="/contacts" className="text-sm text-brand">
-        {t(locale, "contacts.back")}
-      </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">{t(locale, "contacts.new")}</h1>
-      <p className="mt-1 text-sm text-muted">{t(locale, "contacts.newHint")}</p>
-      {message ? <p className="mt-4 text-sm text-red-800">{message}</p> : null}
-      <form action={createContact} className={`mt-6 space-y-4 p-5 ${cardClass}`}>
+    <PageFrame
+      back={{ href: "/contacts", label: t(locale, "contacts.back") }}
+      title={t(locale, "contacts.new")}
+      hint={t(locale, "contacts.newHint")}
+    >
+      {message ? <p className="mb-4 text-sm text-red-800">{message}</p> : null}
+      <div className="row">
+        <div className="col-lg-6">
+      <form action={createContact} className={`space-y-4 p-5 ${cardClass}`}>
         <FormPending />
         <label className="block text-sm">
           <span className="mb-1 block text-muted">{t(locale, "contacts.name")}</span>
@@ -61,6 +62,8 @@ export default async function NewContactPage({
         </label>
         <BlobButton tone="action">{t(locale, "contacts.save")}</BlobButton>
       </form>
-    </main>
+        </div>
+      </div>
+    </PageFrame>
   );
 }

@@ -24,40 +24,44 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="crm-shell">
       <LiveRefresh />
-      <header className="border-b border-line bg-white/85 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[85vw] flex-col gap-3 px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <BrandMark />
+      <header className="crm-nav">
+        <div className="container-fluid">
+          <div className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <BrandMark light />
+            <NavLinks
+              links={[
+                { href: "/", label: t(locale, "nav.pipeline") },
+                { href: "/leads", label: t(locale, "nav.leads") },
+                { href: "/companies", label: t(locale, "nav.companies") },
+                { href: "/contacts", label: t(locale, "nav.contacts") },
+                { href: "/team", label: t(locale, "nav.team") },
+              ]}
+            />
             <div className="flex items-center gap-3 text-sm">
               <span className="hidden text-right sm:block">
-                <span className="block text-sm text-ink">{profile?.name ?? session.name}</span>
-                {profile?.title ? <span className="block text-xs text-muted">{profile.title}</span> : null}
+                <span className="block text-sm text-white">{profile?.name ?? session.name}</span>
+                {profile?.title ? <span className="block text-xs text-white/75">{profile.title}</span> : null}
               </span>
               <Suspense fallback={null}>
-                <LanguageSwitch locale={locale} />
+                <LanguageSwitch locale={locale} onBrand />
               </Suspense>
               <form action={logout}>
                 <FormPending />
-                <BlobButton tone="auth">{t(locale, "auth.logout")}</BlobButton>
+                <BlobButton tone="auth" className="tone-blob--inverse">
+                  {t(locale, "auth.logout")}
+                </BlobButton>
               </form>
             </div>
           </div>
-          <NavLinks
-            links={[
-              { href: "/", label: t(locale, "nav.pipeline") },
-              { href: "/leads", label: t(locale, "nav.leads") },
-              { href: "/companies", label: t(locale, "nav.companies") },
-              { href: "/contacts", label: t(locale, "nav.contacts") },
-              { href: "/team", label: t(locale, "nav.team") },
-            ]}
-          />
         </div>
       </header>
-      <div className="mx-auto w-full max-w-[85vw] px-4 py-6 sm:px-6 lg:px-8">{children}</div>
-      <footer className="mx-auto w-full max-w-[85vw] px-4 pb-8 sm:px-6 lg:px-8">
-        <DeveloperCredit />
+      <div className="crm-main">{children}</div>
+      <footer className="crm-footer">
+        <div className="container-fluid py-4">
+          <DeveloperCredit light />
+        </div>
       </footer>
     </div>
   );

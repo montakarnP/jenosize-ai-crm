@@ -19,8 +19,8 @@ export default async function LoginPage({
     error === "invalid" ? t(locale, "auth.invalid") : error === "config" ? t(locale, "auth.config") : null;
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 sm:py-16">
-      <section className="w-full max-w-md rounded-3xl border border-line bg-white/90 p-6 shadow-[0_24px_70px_rgba(32,76,213,0.1)] sm:p-8">
+    <main className="crm-login flex w-full items-center justify-center px-4 py-10">
+      <section className="w-full max-w-md border border-line bg-white/90 p-6 shadow-[0_24px_70px_rgba(32,76,213,0.1)] sm:rounded-3xl sm:p-8">
         <div className="flex items-start justify-between gap-3">
           <BrandMark />
           <Suspense fallback={null}>
