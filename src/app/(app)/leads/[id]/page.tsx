@@ -82,6 +82,7 @@ export default async function LeadDetailPage({
   const unsent = lead.messages.filter(
     (message) => message.direction === "OUTBOUND" && (message.status === "DRAFT" || message.status === "FAILED"),
   );
+  const offerRetry = error === "line-user" || error === "line-send";
 
   const suggestion = readSuggestion(
     [...lead.activities].reverse().find((activity) => activity.type === "AI_SUGGESTION")?.metadata,
@@ -100,6 +101,20 @@ export default async function LeadDetailPage({
     >
       <MarkSeen leadId={lead.id} enabled={timeline.some((item) => item.fresh)} />
       {errorMessage ? <p className="mb-4 text-sm text-red-800">{errorMessage}</p> : null}
+      {offerRetry && unsent.length > 0 ? (
+        <div className="mb-4 space-y-3">
+          {unsent.map((message) => (
+            <form key={message.id} action={sendLine} className={`space-y-2 p-4 ${cardClass}`}>
+              <FormPending />
+              <input type="hidden" name="leadId" value={lead.id} />
+              <input type="hidden" name="messageId" value={message.id} />
+              <p className="text-sm leading-6">{message.body}</p>
+              {message.error ? <p className="text-sm text-red-800">{message.error}</p> : null}
+              <BlobButton tone="action">{t(locale, "lead.retry")}</BlobButton>
+            </form>
+          ))}
+        </div>
+      ) : null}
       <section className={`mt-6 p-4 ${cardClass}`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
@@ -246,7 +261,7 @@ export default async function LeadDetailPage({
                   <p className="text-sm leading-6">{message.body}</p>
                   {message.error ? <p className="text-sm text-red-800">{message.error}</p> : null}
                   <BlobButton tone="action">
-                    {message.status === "FAILED" ? t(locale, "lead.retry") : t(locale, "lead.approve")}
+                    {message.status === "FAILED" || offerRetry ? t(locale, "lead.retry") : t(locale, "lead.approve")}
                   </BlobButton>
                 </form>
               ))}

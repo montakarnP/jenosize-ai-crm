@@ -88,7 +88,24 @@ export async function sendApprovedDraft(input: {
   if (message.status !== "DRAFT" && message.status !== "FAILED") return { ok: false, code: "not_draft" };
 
   const lineUserId = message.lead?.contact?.lineUserId;
-  if (!lineUserId) return { ok: false, code: "no_line_user" };
+  if (!lineUserId) {
+    const error = "This contact has no LINE user.";
+    await prisma.message.update({
+      where: { id: message.id },
+      data: { status: "FAILED", error },
+    });
+    await prisma.activity.create({
+      data: {
+        leadId: input.leadId,
+        actorId: input.actorId,
+        type: "LINE_MESSAGE",
+        body: `LINE send failed. ${error}`,
+        metadata: { status: "FAILED", outbound: false, messageId: message.id },
+      },
+    });
+    console.info(JSON.stringify({ event: "line.send", messageId: message.id, mode: lineMode(), status: "FAILED" }));
+    return { ok: false, code: "no_line_user" };
+  }
 
   const claimed = await prisma.message.updateMany({
     where: { id: message.id, status: { in: ["DRAFT", "FAILED"] } },
