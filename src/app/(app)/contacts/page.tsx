@@ -26,12 +26,13 @@ export default async function ContactsPage() {
       }
       action={<BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>}
     >
+      <div className="crm-panel">
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
         {contacts.map((contact) => (
           <div className="col" key={contact.id}>
           <article className={`h-full p-4 ${cardClass}`}>
-            <p className="font-medium">{contact.name}</p>
-            <p className="mt-1 text-sm text-muted">
+            <p className="font-medium break-words">{contact.name}</p>
+            <p className="mt-1 text-sm break-words text-muted">
               {contact.title ?? t(locale, "contacts.noTitle")} · {contact.company?.name ?? t(locale, "common.noCompany")}
             </p>
             <p className="mt-3 text-sm text-muted">{contact.email ?? t(locale, "contacts.noEmail")}</p>
@@ -58,6 +59,7 @@ export default async function ContactsPage() {
           </article>
           </div>
         ))}
+      </div>
       </div>
     </PageFrame>
   );

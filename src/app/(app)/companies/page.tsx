@@ -23,15 +23,15 @@ export default async function CompaniesPage() {
       hint={t(locale, "companies.summary", { count: companies.length, industries: industries.length })}
       action={<BlobLink href="/companies/new">{t(locale, "companies.add")}</BlobLink>}
     >
-      <div className="space-y-8">
+      <div className="space-y-6">
         {grouped.map((group) => (
-          <section key={group.industry}>
+          <section key={group.industry} className="crm-panel">
             <h2 className="text-lg font-medium text-brand">{group.industry}</h2>
             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-3 mt-1">
               {group.companies.map((company) => (
                 <div className="col" key={company.id}>
-                  <Link href={`/companies/${company.id}`} className={`block h-full p-4 ${cardClass}`}>
-                    <p className="font-medium">{company.name}</p>
+                  <Link href={`/companies/${company.id}`} className={`block h-full p-4 transition-colors hover:border-brand ${cardClass}`}>
+                    <p className="font-medium break-words">{company.name}</p>
                     <p className="mt-3 text-sm text-muted">
                       {countText(locale, "contact", company._count.contacts)} · {countText(locale, "lead", company._count.leads)}
                     </p>

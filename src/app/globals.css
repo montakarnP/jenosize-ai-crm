@@ -499,6 +499,20 @@ a {
   padding-bottom: 2.75rem;
 }
 
+.crm-panel {
+  border: 1px solid #d9e6f5;
+  border-radius: 1.25rem;
+  background: #f8fbff;
+  padding: 1rem;
+  box-shadow: 0 10px 30px rgba(32, 76, 213, 0.06);
+}
+
+@media (min-width: 768px) {
+  .crm-panel {
+    padding: 1.5rem;
+  }
+}
+
 .crm-quick {
   overflow: hidden;
   border-radius: 2px;

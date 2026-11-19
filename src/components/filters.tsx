@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
 import { SOURCES, STAGES } from "@/lib/format";
@@ -9,11 +10,13 @@ export async function Filters({
   q,
   stage,
   source,
+  extra,
 }: {
   action: string;
   q: string;
   stage: string;
   source: string;
+  extra?: ReactNode;
 }) {
   const locale = await getLocale();
   return (
@@ -45,8 +48,9 @@ export async function Filters({
           ))}
         </select>
       </label>
-      <div className="flex items-end">
+      <div className="flex flex-wrap items-end gap-2">
         <BlobButton tone="action">{t(locale, "common.apply")}</BlobButton>
+        {extra}
       </div>
     </form>
   );

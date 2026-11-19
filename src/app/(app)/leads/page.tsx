@@ -23,9 +23,14 @@ export default async function LeadsPage({
     <PageFrame
       title={t(locale, "leads.title")}
       hint={t(locale, "leads.count", { count: leads.length })}
-      action={<BlobLink href="/leads/new">{t(locale, "pipeline.newLead")}</BlobLink>}
     >
-      <Filters action="/leads" q={params.q ?? ""} stage={params.stage ?? ""} source={params.source ?? ""} />
+      <Filters
+        action="/leads"
+        q={params.q ?? ""}
+        stage={params.stage ?? ""}
+        source={params.source ?? ""}
+        extra={<BlobLink href="/leads/new">{t(locale, "pipeline.newLead")}</BlobLink>}
+      />
       <div className="mt-6 space-y-3 md:hidden">
         {leads.length === 0 ? <p className="text-sm text-muted">{t(locale, "leads.empty")}</p> : null}
         {leads.map((lead) => (
