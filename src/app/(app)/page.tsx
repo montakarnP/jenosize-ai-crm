@@ -21,13 +21,8 @@ export default async function PipelinePage({
 
   return (
     <PageFrame
-      title={t(locale, "pipeline.welcome")}
-      hint={
-        <>
-          <p>{t(locale, "pipeline.intro")}</p>
-          <p className="mt-1">{t(locale, "pipeline.count", { count: leads.length })}</p>
-        </>
-      }
+      title={t(locale, "pipeline.title")}
+      hint={t(locale, "pipeline.count", { count: leads.length })}
       aside={
         <aside className="crm-quick">
           <h2>{t(locale, "pipeline.quickLinks")}</h2>

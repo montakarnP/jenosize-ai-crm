@@ -486,6 +486,46 @@ a {
   text-decoration: underline;
 }
 
+.crm-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #204cd5;
+  text-decoration: none;
+}
+
+.crm-back:hover {
+  background: transparent;
+  color: #16348f;
+}
+
+.crm-pagehead {
+  margin-bottom: 1.25rem;
+}
+
+.crm-pagehead__title {
+  margin: 0;
+  color: #020817;
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.crm-pagehead__hint {
+  margin-top: 0.35rem;
+  color: #6d7c8d;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .crm-subnav {
   padding-top: 1.25rem;
 }

@@ -1,3 +1,4 @@
+import { BackIcon } from "@/components/back-icon";
 import { NewLeadForm } from "@/components/new-lead-form";
 import { PageFrame } from "@/components/page-frame";
 import { listCompaniesAndContacts } from "@/lib/crm";
@@ -16,14 +17,10 @@ export default async function NewLeadPage({
     error === "contact" ? t(locale, "lead.contactError") : error === "invalid" ? t(locale, "lead.invalidError") : null;
 
   return (
-    <PageFrame
-      back={{ href: "/leads", label: t(locale, "lead.back") }}
-      title={t(locale, "pipeline.newLead")}
-      hint={t(locale, "lead.newHint")}
-    >
+    <PageFrame title={t(locale, "pipeline.newLead")} hint={t(locale, "lead.newHint")}>
+      <div className="mx-auto w-full max-w-xl">
+      <BackIcon href="/leads" label={t(locale, "lead.back")} />
       {message ? <p className="mb-4 text-sm text-red-800">{message}</p> : null}
-      <div className="row">
-        <div className="col-lg-6">
       <div className={`p-5 ${cardClass}`}>
         {companies.length === 0 ? (
           <p className="text-sm text-muted">{t(locale, "lead.needCompany")}</p>
@@ -50,7 +47,6 @@ export default async function NewLeadPage({
           />
         )}
       </div>
-        </div>
       </div>
     </PageFrame>
   );

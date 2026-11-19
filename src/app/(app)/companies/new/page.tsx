@@ -1,4 +1,5 @@
 import { createCompany } from "@/app/actions";
+import { BackIcon } from "@/components/back-icon";
 import { PageFrame } from "@/components/page-frame";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
@@ -17,14 +18,10 @@ export default async function NewCompanyPage({
     error === "duplicate" ? t(locale, "companies.duplicate") : error === "invalid" ? t(locale, "companies.invalid") : null;
 
   return (
-    <PageFrame
-      back={{ href: "/companies", label: t(locale, "companies.back") }}
-      title={t(locale, "companies.new")}
-      hint={t(locale, "companies.newHint")}
-    >
+    <PageFrame title={t(locale, "companies.new")} hint={t(locale, "companies.newHint")}>
+      <div className="mx-auto w-full max-w-xl">
+      <BackIcon href="/companies" label={t(locale, "companies.back")} />
       {message ? <p className="mb-4 text-sm text-red-800">{message}</p> : null}
-      <div className="row">
-        <div className="col-lg-6">
       <form action={createCompany} className={`space-y-4 p-5 ${cardClass}`}>
         <FormPending />
         <label className="block text-sm">
@@ -43,7 +40,6 @@ export default async function NewCompanyPage({
         </label>
         <BlobButton tone="action">{t(locale, "companies.save")}</BlobButton>
       </form>
-        </div>
       </div>
     </PageFrame>
   );

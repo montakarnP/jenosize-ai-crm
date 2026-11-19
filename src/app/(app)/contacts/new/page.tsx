@@ -1,4 +1,5 @@
 import { createContact } from "@/app/actions";
+import { BackIcon } from "@/components/back-icon";
 import { PageFrame } from "@/components/page-frame";
 import { BlobButton } from "@/components/blob-button";
 import { FormPending } from "@/components/form-pending";
@@ -24,14 +25,10 @@ export default async function NewContactPage({
           : null;
 
   return (
-    <PageFrame
-      back={{ href: "/contacts", label: t(locale, "contacts.back") }}
-      title={t(locale, "contacts.new")}
-      hint={t(locale, "contacts.newHint")}
-    >
+    <PageFrame title={t(locale, "contacts.new")} hint={t(locale, "contacts.newHint")}>
+      <div className="mx-auto w-full max-w-xl">
+      <BackIcon href="/contacts" label={t(locale, "contacts.back")} />
       {message ? <p className="mb-4 text-sm text-red-800">{message}</p> : null}
-      <div className="row">
-        <div className="col-lg-6">
       <form action={createContact} className={`space-y-4 p-5 ${cardClass}`}>
         <FormPending />
         <label className="block text-sm">
@@ -62,7 +59,6 @@ export default async function NewContactPage({
         </label>
         <BlobButton tone="action">{t(locale, "contacts.save")}</BlobButton>
       </form>
-        </div>
       </div>
     </PageFrame>
   );
