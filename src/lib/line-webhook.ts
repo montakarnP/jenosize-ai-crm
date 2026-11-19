@@ -16,6 +16,18 @@ export type LineFollowEvent = {
   timestamp: number;
 };
 
+export function lineDisconnectText(contactName: string, lineCode: string): string {
+  return [
+    `This LINE account is no longer connected to ${contactName}.`,
+    "Send I am and the LINE id to connect again.",
+    `Example: I am ${lineCode}`,
+    "",
+    `บัญชี LINE นี้ไม่ได้เชื่อมกับ ${contactName} แล้ว`,
+    "หากต้องการเชื่อมอีกครั้ง ให้ส่ง I am ตามด้วยรหัส LINE",
+    `ตัวอย่าง: I am ${lineCode}`,
+  ].join("\n");
+}
+
 export function lineGreetingText(): string {
   return [
     "Welcome to Jenosize.",

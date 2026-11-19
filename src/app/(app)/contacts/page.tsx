@@ -13,7 +13,7 @@ import { cardClass, fieldClass } from "@/lib/ui";
 export default async function ContactsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; error?: string }>;
 }) {
   const params = await searchParams;
   const query = (params.q ?? "").trim();
@@ -39,6 +39,9 @@ export default async function ContactsPage({
       }
     >
       <section className="crm-panel">
+        {params.error === "line" ? (
+          <p className="mb-4 text-sm text-red-800">{t(locale, "contacts.disconnectError")}</p>
+        ) : null}
         <form action="/contacts" className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
           <FormPending />
           <input

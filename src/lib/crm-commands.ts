@@ -2,10 +2,12 @@ import { randomBytes } from "crypto";
 import { Prisma, type LeadSource, type LeadStage } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { industries } from "@/lib/industries";
+import { deliverLineText } from "@/lib/line-send";
+import { lineDisconnectText } from "@/lib/line-webhook";
 
 type Failure = {
   ok: false;
-  code: "invalid" | "not_found" | "lost_reason" | "contact" | "duplicate";
+  code: "invalid" | "not_found" | "lost_reason" | "contact" | "duplicate" | "line_send";
 };
 
 const emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -122,10 +124,54 @@ export async function createLeadRecord(input: {
   return { ok: true, leadId: lead.id };
 }
 
-export async function disconnectContactLine(contactId: string): Promise<{ ok: true } | Failure> {
-  const contact = await prisma.contact.findUnique({ where: { id: contactId }, select: { id: true } });
+export async function disconnectContactLine(contactId: string, actorId: string): Promise<{ ok: true } | Failure> {
+  const contact = await prisma.contact.findUnique({
+    where: { id: contactId },
+    select: { id: true, name: true, lineCode: true, lineUserId: true },
+  });
   if (!contact) return { ok: false, code: "not_found" };
-  await prisma.contact.update({ where: { id: contactId }, data: { lineUserId: null } });
+  if (!contact.lineUserId) return { ok: true };
+
+  const body = lineDisconnectText(contact.name, contact.lineCode);
+  const externalId = `disconnect:${contact.id}:${Date.now()}`;
+  const result = await deliverLineText({
+    to: contact.lineUserId,
+    text: body,
+    replyToken: null,
+    externalId,
+  });
+  if (!result.ok) return { ok: false, code: "line_send" };
+
+  const leads = await prisma.lead.findMany({
+    where: { contactId: contact.id },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, stage: true },
+  });
+  const leadId = (leads.find((lead) => lead.stage !== "WON" && lead.stage !== "LOST") ?? leads[0])?.id ?? null;
+  await prisma.message.create({
+    data: {
+      leadId,
+      contactId: contact.id,
+      channel: "LINE",
+      direction: "OUTBOUND",
+      status: "SENT",
+      body,
+      externalId: result.externalId,
+      lineUserId: contact.lineUserId,
+    },
+  });
+  if (leadId) {
+    await prisma.activity.create({
+      data: {
+        leadId,
+        actorId,
+        type: "LINE_MESSAGE",
+        body: `Told ${contact.name} on LINE that this account was disconnected.`,
+        metadata: { status: "SENT", outbound: true },
+      },
+    });
+  }
+  await prisma.contact.update({ where: { id: contact.id }, data: { lineUserId: null } });
   return { ok: true };
 }
 

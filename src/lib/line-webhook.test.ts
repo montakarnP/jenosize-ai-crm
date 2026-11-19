@@ -4,6 +4,7 @@ import {
   decideLineLink,
   lineEventIdempotencyKey,
   lineFollowIdempotencyKey,
+  lineDisconnectText,
   lineGreetingText,
   lineLinkReply,
   readLineLinkClaim,
@@ -70,6 +71,9 @@ test("adding the LINE account is a follow event and other event types stay ignor
   assert.equal(parsed.follows[0]?.userId, "UnewFriend0001");
   assert.equal(parsed.follows[0]?.replyToken, "reply-follow");
   assert.equal(lineFollowIdempotencyKey("evt-follow-0001"), "line-follow:evt-follow-0001");
+  assert.match(lineDisconnectText("Oishi Contact", "LK-OISHI"), /no longer connected to Oishi Contact/);
+  assert.match(lineDisconnectText("Oishi Contact", "LK-OISHI"), /ไม่ได้เชื่อมกับ Oishi Contact/);
+  assert.match(lineDisconnectText("Oishi Contact", "LK-OISHI"), /I am LK-OISHI/);
   assert.match(lineGreetingText(), /I am LK-OISHI/);
   assert.match(lineGreetingText(), /ยินดีต้อนรับสู่ Jenosize/);
 });

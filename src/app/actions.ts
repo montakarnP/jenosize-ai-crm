@@ -168,10 +168,12 @@ export async function createCompany(formData: FormData) {
 export async function disconnectLine(formData: FormData) {
   const user = await requireUser();
   if (user.role !== "ADMIN") redirect("/contacts");
-  await disconnectContactLine(String(formData.get("contactId") ?? ""));
+  const result = await disconnectContactLine(String(formData.get("contactId") ?? ""), user.uid);
+  if (!result.ok) redirect(result.code === "line_send" ? "/contacts?error=line" : "/contacts");
   revalidatePath("/contacts");
   revalidatePath("/");
   revalidatePath("/leads");
+  redirect("/contacts");
 }
 
 export async function createContact(formData: FormData) {
