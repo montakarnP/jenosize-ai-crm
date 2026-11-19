@@ -32,7 +32,17 @@ export default async function PipelinePage({
         </aside>
       }
     >
-      <Filters action="/" q={params.q ?? ""} stage={params.stage ?? ""} source={params.source ?? ""} />
+      <Filters
+        action="/"
+        q={params.q ?? ""}
+        stage={params.stage ?? ""}
+        source={params.source ?? ""}
+        extra={
+          <Link href="/" className="crm-clear">
+            {t(locale, "common.clear")}
+          </Link>
+        }
+      />
       <div className="row row-cols-1 row-cols-md-2 row-cols-xl-5 g-3 mt-1">
         {STAGES.map((stage) => {
           const column = leads.filter((lead) => lead.stage === stage);

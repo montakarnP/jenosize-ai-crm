@@ -523,6 +523,35 @@ a {
   color: #16348f;
 }
 
+.crm-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 10px 8px;
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  color: #204cd5;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.crm-clear:hover,
+.crm-clear:focus,
+.crm-clear:focus-visible {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  color: #16348f;
+}
+
 .crm-pagehead {
   margin-bottom: 1.25rem;
 }
