@@ -98,6 +98,7 @@ const contacts = [
   { id: "ct_cpall", lineCode: "LK-CPALL", companyId: "co_cpall", name: "CPALL Contact", email: "cpall@example.test", phone: "+66-80-000-0101", title: "Commercial", lineUserId: null },
   { id: "ct_cpall_ops", lineCode: "LK-CPALL-OPS", companyId: "co_cpall", name: "CPALL Store Operations", email: "cpall.ops@example.test", phone: "+66-80-000-0107", title: "Store operations", lineUserId: null },
   { id: "ct_themall", lineCode: "LK-THEMALL", companyId: "co_themall", name: "THEMALL Contact", email: "themall@example.test", phone: "+66-80-000-0102", title: "Contact", lineUserId: null },
+  { id: "ct_themall_lease", lineCode: "LK-THEMALL-LEASE", companyId: "co_themall", name: "THEMALL Leasing", email: "themall.lease@example.test", phone: "+66-80-000-0108", title: "Leasing", lineUserId: null },
   { id: "ct_bigc", lineCode: "LK-BIGC", companyId: "co_bigc", name: "BigC Contact", email: "bigc@example.test", phone: "+66-80-000-0103", title: "Contact", lineUserId: null },
   { id: "ct_cpn", lineCode: "LK-CPN", companyId: "co_cpn", name: "CPN Contact", email: "cpn@example.test", phone: "+66-80-000-0104", title: "Contact", lineUserId: null },
   { id: "ct_watson", lineCode: "LK-WATSON", companyId: "co_watson", name: "Watson Contact", email: "watson@example.test", phone: "+66-80-000-0105", title: "Contact", lineUserId: null },
@@ -376,19 +377,44 @@ const leads: LeadSeed[] = [
     valueThb: 140000,
     createdAt: "2026-11-15T06:10:00.000Z",
   },
+  {
+    id: "lead_mall_leasing",
+    title: "Tenant leasing desk",
+    companyId: "co_themall",
+    contactId: "ct_themall_lease",
+    ownerId: "user_anna",
+    stage: "NEW",
+    source: "LINE",
+    valueThb: 210000,
+    createdAt: "2026-11-16T03:40:00.000Z",
+  },
+  {
+    id: "lead_bigc_scorecard",
+    title: "Vendor scorecard",
+    companyId: "co_bigc",
+    contactId: "ct_bigc",
+    ownerId: "user_erik",
+    stage: "PROPOSAL",
+    source: "MANUAL",
+    valueThb: 125000,
+    createdAt: "2026-11-06T05:15:00.000Z",
+  },
 ];
 
 async function main() {
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
-  await prisma.$transaction([
-    prisma.message.deleteMany(),
-    prisma.activity.deleteMany(),
-    prisma.lead.deleteMany(),
-    prisma.contact.deleteMany(),
-    prisma.company.deleteMany(),
-    prisma.user.deleteMany(),
-  ]);
+  const addOnly = process.env.SEED_ADD_ONLY === "1";
+  if (!addOnly) {
+    await prisma.$transaction([
+      prisma.message.deleteMany(),
+      prisma.activity.deleteMany(),
+      prisma.lead.deleteMany(),
+      prisma.contact.deleteMany(),
+      prisma.company.deleteMany(),
+      prisma.user.deleteMany(),
+    ]);
+  }
 
   await prisma.user.createMany({
     data: users.map((user, index) => ({
@@ -396,15 +422,17 @@ async function main() {
       passwordHash,
       createdAt: new Date(Date.UTC(2026, 0, 1, 0, index)),
     })),
+    skipDuplicates: addOnly,
   });
-  await prisma.company.createMany({ data: companies });
-  await prisma.contact.createMany({ data: contacts });
+  await prisma.company.createMany({ data: companies, skipDuplicates: addOnly });
+  await prisma.contact.createMany({ data: contacts, skipDuplicates: addOnly });
   await prisma.lead.createMany({
     data: leads.map((lead) => ({
       ...lead,
       createdAt: new Date(lead.createdAt),
       updatedAt: new Date(lead.createdAt),
     })),
+    skipDuplicates: addOnly,
   });
 
   await prisma.activity.createMany({
@@ -560,7 +588,24 @@ async function main() {
         body: "Lead created for CPALL Store Operations, the second contact at CP ALL.",
         createdAt: new Date("2026-11-15T06:10:00.000Z"),
       },
+      {
+        id: "act_mall_leasing",
+        leadId: "lead_mall_leasing",
+        actorId: "user_anna",
+        type: "SYSTEM",
+        body: "Lead opened from a LINE conversation with THEMALL Leasing, the second contact at THE MALL.",
+        createdAt: new Date("2026-11-16T03:40:00.000Z"),
+      },
+      {
+        id: "act_bigc_scorecard",
+        leadId: "lead_bigc_scorecard",
+        actorId: "user_erik",
+        type: "NOTE",
+        body: "Second lead for BigC Contact. The hypermarket vendor rollout stays a separate deal.",
+        createdAt: new Date("2026-11-06T05:30:00.000Z"),
+      },
     ],
+    skipDuplicates: addOnly,
   });
 
   await prisma.message.createMany({
@@ -625,7 +670,19 @@ async function main() {
         externalId: "line-msg-demo-0004",
         createdAt: new Date("2026-11-09T03:30:00.000Z"),
       },
+      {
+        id: "msg_mall_lease_in",
+        leadId: "lead_mall_leasing",
+        contactId: "ct_themall_lease",
+        channel: "LINE",
+        direction: "INBOUND",
+        status: "RECEIVED",
+        body: "Can you share a tenant leasing desk plan for the new wing? We have not reviewed it yet.",
+        externalId: "line-msg-demo-0005",
+        createdAt: new Date("2026-11-16T04:05:00.000Z"),
+      },
     ],
+    skipDuplicates: addOnly,
   });
 
   const [userCount, companyCount, contactCount, leadCount, activityCount, messageCount] =
@@ -638,8 +695,17 @@ async function main() {
       prisma.message.count(),
     ]);
 
+  const databaseHost = (() => {
+    try {
+      return new URL(process.env.DATABASE_URL ?? "").hostname;
+    } catch {
+      return "";
+    }
+  })();
+
   console.log(
     JSON.stringify({
+      target: databaseHost === "localhost" || databaseHost === "127.0.0.1" ? "local" : "remote",
       users: userCount,
       companies: companyCount,
       contacts: contactCount,

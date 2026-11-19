@@ -83,7 +83,7 @@ The database checks:
 
 The API returns `lost_reason` with HTTP 400 when that reason is missing. Responses never include password hashes, channel secrets, or access tokens.
 
-The seed creates 9 users, 20 companies, 21 contacts, 22 leads, 18 activities, and 5 messages. CP ALL has two contacts and three leads. CPALL Contact owns Store visit checklist and Night delivery window. CPALL Store Operations owns Franchise onboarding desk. The hosted database also keeps LINE events from the test phone. Those events are real traffic on the test account, not rows in the seed file.
+The seed creates 9 users, 20 companies, 22 contacts, 24 leads, 20 activities, and 6 messages. CP ALL has two contacts and three leads. CPALL Contact owns Store visit checklist and Night delivery window. CPALL Store Operations owns Franchise onboarding desk. THE MALL has two contacts: THEMALL Contact owns Mall member experience, and THEMALL Leasing owns Tenant leasing desk, which has an unread LINE message. Big C has two leads for the same contact: Hypermarket vendor rollout and Vendor scorecard. The hosted database also keeps LINE events from the test phone. Those events are real traffic on the test account, not rows in the seed file. Setting `SEED_ADD_ONLY=1` inserts missing seed rows and leaves existing rows, including live LINE events, in place.
 
 ## Architecture
 
