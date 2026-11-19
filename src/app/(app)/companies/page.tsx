@@ -21,11 +21,14 @@ export default async function CompaniesPage() {
     <PageFrame
       title={t(locale, "companies.title")}
       hint={t(locale, "companies.summary", { count: companies.length, industries: industries.length })}
-      action={<BlobLink href="/companies/new">{t(locale, "companies.add")}</BlobLink>}
     >
-      <div className="space-y-6">
+      <section className="crm-panel">
+        <div className="mb-5 flex justify-end">
+          <BlobLink href="/companies/new">{t(locale, "companies.add")}</BlobLink>
+        </div>
+        <div className="space-y-6">
         {grouped.map((group) => (
-          <section key={group.industry} className="crm-panel">
+          <section key={group.industry}>
             <h2 className="text-lg font-medium text-brand">{group.industry}</h2>
             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-3 mt-1">
               {group.companies.map((company) => (
@@ -41,7 +44,8 @@ export default async function CompaniesPage() {
             </div>
           </section>
         ))}
-      </div>
+        </div>
+      </section>
     </PageFrame>
   );
 }

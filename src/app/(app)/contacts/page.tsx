@@ -24,9 +24,11 @@ export default async function ContactsPage() {
           <p className="mt-1">{t(locale, "contacts.hint")}</p>
         </>
       }
-      action={<BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>}
     >
-      <div className="crm-panel">
+      <section className="crm-panel">
+        <div className="mb-5 flex justify-end">
+          <BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>
+        </div>
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
         {contacts.map((contact) => (
           <div className="col" key={contact.id}>
@@ -60,7 +62,7 @@ export default async function ContactsPage() {
           </div>
         ))}
       </div>
-      </div>
+      </section>
     </PageFrame>
   );
 }
