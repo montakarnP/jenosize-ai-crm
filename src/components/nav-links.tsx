@@ -1,19 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AppLink as Link } from "@/components/app-link";
 import { usePathname } from "next/navigation";
 
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
 export function NavLinks({
   links,
+  menuLabel,
+  closeLabel,
 }: {
   links: Array<{ href: string; label: string }>;
+  menuLabel: string;
+  closeLabel: string;
 }) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
-    <nav className="nav-links">
+    <>
+      <button
+        type="button"
+        className={open ? "crm-menu-toggle is-open" : "crm-menu-toggle"}
+        aria-label={open ? closeLabel : menuLabel}
+        aria-expanded={open}
+        aria-controls="crm-mobile-menu"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+        <span aria-hidden="true" />
+      </button>
+      <nav id="crm-mobile-menu" className={open ? "crm-menu-panel is-open" : "crm-menu-panel"} hidden={!open}>
+        {links.map((link) => (
+          <Link key={link.href} href={link.href} className={isActive(pathname, link.href) ? "is-active" : undefined}>
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+      <nav className="nav-links">
       {links.map((link) => {
-        const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+        const active = isActive(pathname, link.href);
         return (
           <Link key={link.href} href={link.href} className={active ? "blob-btn is-active" : "blob-btn"}>
             {link.label}
@@ -38,5 +72,6 @@ export function NavLinks({
         </defs>
       </svg>
     </nav>
+    </>
   );
 }

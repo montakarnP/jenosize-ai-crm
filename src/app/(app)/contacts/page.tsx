@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { disconnectLine } from "@/app/actions";
+import { AppLink as Link } from "@/components/app-link";
 import { PageFrame } from "@/components/page-frame";
 import { BlobButton, BlobLink } from "@/components/blob-button";
 import { LineStatus } from "@/components/line-status";
@@ -7,10 +8,22 @@ import { FormPending } from "@/components/form-pending";
 import { listContacts } from "@/lib/crm";
 import { countText, getLocale, t } from "@/lib/i18n";
 import { readSession, SESSION_COOKIE } from "@/lib/session";
-import { cardClass } from "@/lib/ui";
+import { cardClass, fieldClass } from "@/lib/ui";
 
-export default async function ContactsPage() {
-  const contacts = await listContacts();
+export default async function ContactsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const params = await searchParams;
+  const query = (params.q ?? "").trim();
+  const needle = query.toLowerCase();
+  const contacts = (await listContacts()).filter((contact) => {
+    if (!needle) return true;
+    return [contact.name, contact.title, contact.email, contact.phone, contact.lineCode, contact.company?.name]
+      .filter((value): value is string => Boolean(value))
+      .some((value) => value.toLowerCase().includes(needle));
+  });
   const locale = await getLocale();
   const session = await readSession((await cookies()).get(SESSION_COOKIE)?.value);
   const isAdmin = session?.role === "ADMIN";
@@ -26,10 +39,27 @@ export default async function ContactsPage() {
       }
     >
       <section className="crm-panel">
-        <div className="mb-5 flex justify-end">
-          <BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>
-        </div>
+        <form action="/contacts" className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center">
+          <FormPending />
+          <input
+            name="q"
+            defaultValue={query}
+            placeholder={t(locale, "contacts.filter")}
+            aria-label={t(locale, "contacts.filter")}
+            className={`${fieldClass} min-w-0 flex-1`}
+          />
+          <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <BlobButton tone="action">{t(locale, "common.apply")}</BlobButton>
+            {query ? (
+              <Link href="/contacts" className="crm-clear">
+                {t(locale, "common.clear")}
+              </Link>
+            ) : null}
+            <BlobLink href="/contacts/new">{t(locale, "contacts.add")}</BlobLink>
+          </div>
+        </form>
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
+        {contacts.length === 0 ? <p className="col text-sm text-muted">{t(locale, "contacts.empty")}</p> : null}
         {contacts.map((contact) => (
           <div className="col" key={contact.id}>
           <article className={`h-full p-4 ${cardClass}`}>

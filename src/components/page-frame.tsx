@@ -36,6 +36,8 @@ export async function PageFrame({
       <div className="crm-subnav">
         <div className="container-fluid">
           <NavLinks
+            menuLabel={t(locale, "nav.menu")}
+            closeLabel={t(locale, "nav.closeMenu")}
             links={[
               { href: "/", label: t(locale, "nav.pipeline") },
               { href: "/leads", label: t(locale, "nav.leads") },

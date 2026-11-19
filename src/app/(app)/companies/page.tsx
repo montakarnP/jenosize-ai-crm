@@ -1,5 +1,6 @@
 import { AppLink as Link } from "@/components/app-link";
 import { BlobLink } from "@/components/blob-button";
+import { CompanyGroup } from "@/components/company-group";
 import { PageFrame } from "@/components/page-frame";
 import { listCompanies } from "@/lib/crm";
 import { countText, getLocale, t } from "@/lib/i18n";
@@ -28,8 +29,12 @@ export default async function CompaniesPage() {
         </div>
         <div className="space-y-6">
         {grouped.map((group) => (
-          <section key={group.industry}>
-            <h2 className="text-lg font-medium text-brand">{group.industry}</h2>
+          <CompanyGroup
+            key={group.industry}
+            title={group.industry}
+            showLabel={t(locale, "companies.show", { name: group.industry })}
+            hideLabel={t(locale, "companies.hide", { name: group.industry })}
+          >
             <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-3 mt-1">
               {group.companies.map((company) => (
                 <div className="col" key={company.id}>
@@ -42,7 +47,7 @@ export default async function CompaniesPage() {
                 </div>
               ))}
             </div>
-          </section>
+          </CompanyGroup>
         ))}
         </div>
       </section>

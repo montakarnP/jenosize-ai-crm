@@ -4,6 +4,8 @@ export const LOCALE_COOKIE = "crm_locale";
 export type Locale = "en" | "th";
 
 const en = {
+  "nav.menu": "Open menu",
+  "nav.closeMenu": "Close menu",
   "nav.pipeline": "Pipeline",
   "nav.leads": "Leads",
   "nav.companies": "Companies",
@@ -114,6 +116,8 @@ const en = {
   "contacts.count": "{count} contacts",
   "contacts.hint": "To connect a phone, send I am and the mock LINE id. Example: I am LK-OISHI.",
   "contacts.add": "Add contact",
+  "contacts.filter": "Name, company, email, or LINE id",
+  "contacts.empty": "No contacts match this filter.",
   "contacts.noTitle": "No title",
   "contacts.noEmail": "No email",
   "contacts.noPhone": "No phone",
@@ -131,6 +135,8 @@ const en = {
   "companies.title": "Companies",
   "companies.summary": "{count} companies across {industries} industries",
   "companies.add": "Add company",
+  "companies.show": "Show {name}",
+  "companies.hide": "Hide {name}",
   "companies.back": "Back to companies",
   "companies.new": "New company",
   "companies.newHint": "Use one of the Jenosize industry groups.",
@@ -166,6 +172,8 @@ const en = {
 };
 
 const th: typeof en = {
+  "nav.menu": "เปิดเมนู",
+  "nav.closeMenu": "ปิดเมนู",
   "nav.pipeline": "Pipeline",
   "nav.leads": "Leads",
   "nav.companies": "บริษัท",
@@ -276,6 +284,8 @@ const th: typeof en = {
   "contacts.count": "ผู้ติดต่อ {count} คน",
   "contacts.hint": "หากต้องการเชื่อมต่อโทรศัพท์ ให้ส่งข้อความ I am ตามด้วยรหัส LINE จำลอง เช่น I am LK-OISHI",
   "contacts.add": "เพิ่มผู้ติดต่อ",
+  "contacts.filter": "ชื่อ บริษัท อีเมล หรือรหัส LINE",
+  "contacts.empty": "ไม่พบผู้ติดต่อที่ตรงกับตัวกรอง",
   "contacts.noTitle": "ไม่มีตำแหน่ง",
   "contacts.noEmail": "ไม่มีอีเมล",
   "contacts.noPhone": "ไม่มีโทรศัพท์",
@@ -293,6 +303,8 @@ const th: typeof en = {
   "companies.title": "บริษัท",
   "companies.summary": "บริษัท {count} แห่ง ใน {industries} อุตสาหกรรม",
   "companies.add": "เพิ่มบริษัท",
+  "companies.show": "แสดง {name}",
+  "companies.hide": "ซ่อน {name}",
   "companies.back": "กลับไปที่บริษัท",
   "companies.new": "บริษัทใหม่",
   "companies.newHint": "เลือกหนึ่งในกลุ่มอุตสาหกรรมของ Jenosize",
