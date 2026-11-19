@@ -34,15 +34,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 <span className="block text-sm text-white">{profile?.name ?? session.name}</span>
                 {profile?.title ? <span className="block text-xs text-white/75">{profile.title}</span> : null}
               </span>
-              <Suspense fallback={null}>
-                <LanguageSwitch locale={locale} onBrand />
-              </Suspense>
               <form action={logout}>
                 <FormPending />
                 <BlobButton tone="auth" className="tone-blob--inverse">
                   {t(locale, "auth.logout")}
                 </BlobButton>
               </form>
+              <Suspense fallback={null}>
+                <LanguageSwitch locale={locale} onBrand />
+              </Suspense>
             </div>
           </div>
         </div>
